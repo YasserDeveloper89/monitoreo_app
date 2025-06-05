@@ -1,4 +1,4 @@
-nombre,lat,lon,temperatura,precipitacion
-Estacion A,19.4326,-99.1332,22,5
-Estacion B,20.6597,-103.3496,24,10
-Estacion C,21.1619,-86.8515,30,15
+nombre,lat,lon,temperatura,precipitacion,estado
+Estacion A,19.4326,-99.1332,22,5,inactiva
+Estacion B,20.6597,-103.3496,24,10,activa
+Estacion C,21.1619,-86.8515,30,15,activa
