@@ -12,7 +12,12 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-img_base64 = get_base64_of_bin_file("fondo.jpg")
+# Asegúrate de que 'fondo.jpg' exista en el mismo directorio o proporciona la ruta completa.
+try:
+    img_base64 = get_base64_of_bin_file("fondo.jpg")
+except FileNotFoundError:
+    st.error("Error: 'fondo.jpg' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
+    img_base64 = "" # Para evitar errores si la imagen no se encuentra
 
 st.markdown(f"""
 <style>
@@ -88,7 +93,7 @@ def login():
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
             st.success("Sesión iniciada correctamente.")
-            st.experimental_rerun()
+            st.rerun() # CAMBIO AQUÍ
         else:
             st.error("Usuario o contraseña incorrectos.")
 
@@ -101,34 +106,43 @@ def dashboard():
         st.markdown("Bienvenido a Polaris Web, visualiza y analiza datos ambientales en tiempo real.")
     elif opcion == "Mapa":
         st.subheader("Estaciones en Mapa")
-        df = pd.read_csv("estaciones.csv")
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=pdk.ViewState(
-                latitude=df["lat"].mean(),
-                longitude=df["lon"].mean(),
-                zoom=6,
-                pitch=50,
-            ),
-            layers=[
-                pdk.Layer(
-                    'ScatterplotLayer',
-                    data=df,
-                    get_position='[lon, lat]',
-                    get_color='[0, 112, 255, 160]',
-                    get_radius=2500,
+        # Asegúrate de que 'estaciones.csv' exista en el mismo directorio o proporciona la ruta completa.
+        try:
+            df = pd.read_csv("estaciones.csv")
+            st.pydeck_chart(pdk.Deck(
+                map_style='mapbox://styles/mapbox/light-v9',
+                initial_view_state=pdk.ViewState(
+                    latitude=df["lat"].mean(),
+                    longitude=df["lon"].mean(),
+                    zoom=6,
+                    pitch=50,
                 ),
-            ],
-        ))
+                layers=[
+                    pdk.Layer(
+                        'ScatterplotLayer',
+                        data=df,
+                        get_position='[lon, lat]',
+                        get_color='[0, 112, 255, 160]',
+                        get_radius=2500,
+                    ),
+                ],
+            ))
+        except FileNotFoundError:
+            st.error("Error: 'estaciones.csv' no encontrado. No se puede cargar el mapa.")
     elif opcion == "Gráficos":
         st.subheader("Temperatura y Precipitación")
-        df = pd.read_csv("estaciones.csv")
-        st.line_chart(df[["temperatura", "precipitacion"]])
+        # Asegúrate de que 'estaciones.csv' exista en el mismo directorio o proporciona la ruta completa.
+        try:
+            df = pd.read_csv("estaciones.csv")
+            st.line_chart(df[["temperatura", "precipitacion"]])
+        except FileNotFoundError:
+            st.error("Error: 'estaciones.csv' no encontrado. No se pueden generar los gráficos.")
     elif opcion == "Cerrar sesión":
         st.session_state.logged_in = False
-        st.experimental_rerun()
+        st.rerun() # CAMBIO AQUÍ
 
 if st.session_state.logged_in:
     dashboard()
 else:
     login()
+            
