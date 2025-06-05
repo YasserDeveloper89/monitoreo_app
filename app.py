@@ -157,7 +157,7 @@ div.stTextInput > div > input::placeholder {{
     font-size: 1rem; /* Consistent font size */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
-    padding: 12px 20px !important; /* Increased padding for better click area */
+    padding: 8px 20px !important; /* REDUCED VERTICAL PADDING: de 12px a 8px */
     margin-bottom: 0px !important; /* Remove space between items */
     border-radius: 0px !important; /* Sharp corners like the example */
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -279,6 +279,67 @@ div.stSelectbox > label {{
 
 </style>
 """, unsafe_allow_html=True)
+    # JavaScript para cerrar el sidebar automáticamente al hacer clic en una opción
+st.components.v1.html("""
+<script>
+    function setupSidebarAutoClose() {
+        // Selecciona todos los elementos de las opciones del menú dentro del sidebar
+        const menuItems = document.querySelectorAll('[data-testid="stSidebarContent"] .stRadio label');
+        // Selecciona el contenedor principal de la aplicación, que cuando se hace clic, suele cerrar el sidebar
+        const mainAppContainer = document.querySelector('[data-testid="stAppViewContainer"]');
+
+        if (!mainAppContainer) {
+            // console.warn("Main app container not found for sidebar auto-close.");
+            return;
+        }
+
+        menuItems.forEach(item => {
+            // Evita adjuntar el evento más de una vez si el DOM se re-renderiza
+            // Esto es una solución simple, para una robustez mayor se podría usar removeEventListener
+            if (!item.hasAttribute('data-sidebar-close-listener')) {
+                item.addEventListener('click', () => {
+                    // Retrasa la simulación del clic ligeramente para permitir que Streamlit procese la selección del menú primero
+                    setTimeout(() => {
+                        // Simula un clic en el contenedor principal de la aplicación para cerrar el sidebar
+                        // Esta es una forma común de cerrar el sidebar móvil de Streamlit
+                        if (mainAppContainer) {
+                            mainAppContainer.click();
+                            // console.log("Simulated click on main app container to close sidebar.");
+                        }
+                    }, 100); // Pequeño retraso de 100ms
+                });
+                item.setAttribute('data-sidebar-close-listener', 'true'); // Marca que el listener ha sido añadido
+            }
+        });
+
+        // console.log("Sidebar auto-close script loaded and listeners attached.");
+    }
+
+    // Ejecuta la función de configuración después de que el documento esté listo
+    document.addEventListener('DOMContentLoaded', setupSidebarAutoClose);
+
+    // Usa un MutationObserver para re-ejecutar la configuración si el DOM de Streamlit cambia
+    // Esto es importante porque Streamlit re-renderiza partes de la página dinámicamente
+    const observer = new MutationObserver((mutationsList, observer) => {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                // Una forma simple de verificar si se han añadido nodos relevantes,
+                // podría hacerse más específico buscando data-testid="stSidebar"
+                setupSidebarAutoClose();
+                // console.log("DOM mutation detected, re-running sidebar auto-close setup.");
+                break; // Solo necesitamos correr una vez por lote de mutación
+            }
+        }
+    });
+
+    // Comienza a observar el body en busca de cambios en la lista de hijos (childList)
+    // y en todo el subárbol (subtree) para capturar la aparición/desaparición del sidebar
+    observer.observe(document.body, { childList: true, subtree: true });
+
+</script>
+""", height=0, width=0) # Altura y ancho 0 porque solo inyecta un script
+
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -539,4 +600,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-                    
+    
