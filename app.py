@@ -117,10 +117,10 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebar"] {{
     background-color: #1A2437; /* Dark background */
     color: white;
-    padding-top: 20px;
+    padding-top: 0px; /* Ajustar padding para dejar espacio para el título dentro del contenido */
     padding-left: 0px;
     padding-right: 0px;
-    height: 100vh; /* Aseguramos que ocupe toda la altura */
+    height: 100vh; /* Aseguramos que ocupe toda la altura de la ventana */
     display: flex; /* Usamos flexbox para gestionar el contenido interno */
     flex-direction: column; /* Contenido apilado verticalmente */
 }}
@@ -130,27 +130,31 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] {{
     flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
     overflow-y: auto; /* Habilitamos el scroll vertical si el contenido excede el espacio */
+    padding-top: 20px; /* Añadimos padding superior aquí para el título */
     padding-bottom: 20px; /* Espacio para que la última opción no se pegue al borde */
+    /* Añadimos padding horizontal para el contenido */
+    padding-left: 0px;
+    padding-right: 0px;
 }}
 
 /* Title in the sidebar */
-[data-testid="stSidebar"] h1 {{
+[data-testid="stSidebarContent"] h1 {{ /* Target the H1 inside the scrollable content */
     color: white;
     text-align: left;
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
-    padding: 0 20px;
+    padding: 0 20px; /* Apply horizontal padding here for the title */
 }}
 
 /* Ensure the radio group container fills the width */
-[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
+[data-testid="stSidebarContent"] .stRadio div[role="radiogroup"] {{
     width: 100%;
     padding: 0;
 }}
 
 /* Each radio option label (the clickable area) */
-[data-testid="stSidebar"] .stRadio label {{
-    font-size: 1rem;
+[data-testid="stSidebarContent"] .stRadio label {{
+    font-size: 1rem; /* Consistent font size */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
     padding: 12px 20px !important; /* Increased padding for better click area */
@@ -160,17 +164,23 @@ div.stTextInput > div > input::placeholder {{
     display: flex !important; /* Use flexbox for icon/text alignment */
     align-items: center !important;
     width: 100% !important; /* Ensure it takes full width */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle line separator */
+}}
+
+/* Remove border from the last menu item to avoid an extra line at the bottom */
+[data-testid="stSidebarContent"] .stRadio label:last-child {{
+    border-bottom: none !important;
 }}
 
 /* Hover state for menu options */
-[data-testid="stSidebar"] .stRadio label:hover {{
+[data-testid="stSidebarContent"] .stRadio label:hover {{
     background-color: #2D3E5E !important; /* Lighter background on hover */
     color: white !important; /* Pure white text on hover */
     cursor: pointer !important;
 }}
 
 /* Selected (active) state for menu options */
-[data-testid="stSidebar"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
+[data-testid="stSidebarContent"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
     background-color: #0E1629 !important; /* Darker background for selected item */
     color: white !important; /* Pure white text for selected item */
     font-weight: 600 !important; /* Slightly bolder */
@@ -178,12 +188,12 @@ div.stTextInput > div > input::placeholder {{
 
 /* This is the key to remove the native radio bullet point/circle */
 /* Target the div that contains the actual radio input element */
-[data-testid="stSidebar"] .stRadio label > div:first-child {{
+[data-testid="stSidebarContent"] .stRadio label > div:first-child {{
     display: none !important;
 }}
 
 /* If using markdown in label (for emojis/icons), ensure it's aligned */
-[data-testid="stSidebar"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
+[data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
     gap: 10px; /* Space between icon and text */
@@ -529,4 +539,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-            
+                    
