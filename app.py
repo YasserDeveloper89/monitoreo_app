@@ -3,8 +3,6 @@ import pandas as pd
 import pydeck as pdk
 import base64
 import re
-import plotly.express as px
-import datetime
 
 USERS = {"admin": "1234"}
 
@@ -29,7 +27,7 @@ except FileNotFoundError:
 
 st.markdown(f"""
 <style>
-/* Base container for the app view - Se mantiene como está, no se toca */
+/* Base container for the app view */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -38,13 +36,20 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    /* Añadimos flexbox para controlar la alineación vertical */
+    display: flex;
+    flex-direction: column;
+    /* Esto es clave: alinea los ítems al inicio del contenedor (arriba) */
+    justify-content: flex-start; 
+    align-items: center; /* Centra horizontalmente el contenido */
+    padding-top: 0; /* Asegurarse de que no haya padding superior en el contenedor principal */
 }}
 
-/* Logo container styles - Se mantiene como está, no se toca */
+/* Logo container styles */
 .logo-container {{
     text-align: center;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-top: 0.5rem; /* Reducido al mínimo */
+    margin-bottom: 1rem; /* Ajustar según sea necesario */
 }}
 
 .logo-container img {{
@@ -54,15 +59,15 @@ st.markdown(f"""
     margin: 0 auto;
 }}
 
-/* General H1 styles - Se mantiene como está, no se toca */
+/* General H1 styles */
 h1 {{
     color: white;
     text-align: center;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-top: 0.5rem; /* Reducido al mínimo */
+    margin-bottom: 1rem; /* Ajustar según sea necesario */
 }}
 
-/* Button styles - Se mantiene como está, no se toca */
+/* Button styles */
 .stButton > button {{
     background-color: #1E90FF;
     color: white;
@@ -80,7 +85,7 @@ h1 {{
     background-color: #1c7ed6;
 }}
 
-/* Text input label styles - Se mantiene como está, no se toca */
+/* Text input label styles */
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
@@ -89,7 +94,7 @@ div.stTextInput > label {{
     color: white;
 }}
 
-/* Text input field styles - Se mantiene como está, no se toca */
+/* Text input field styles */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -106,92 +111,74 @@ div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* --- ESTILOS DEL MENÚ LATERAL (SIDEBAR) --- */
+/* --- REVISED AND MORE AGGRESSIVE STYLES FOR THE SIDEBAR MENU --- */
 
 /* Overall sidebar background and spacing */
 [data-testid="stSidebar"] {{
-    background-color: #1A2437; /* Fondo oscuro */
+    background-color: #1A2437; /* Dark background */
     color: white;
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
-    display: flex;
-    flex-direction: column;
-}}
-
-/* Contenedor del contenido del sidebar - CRÍTICO para el scroll y espacio */
-[data-testid="stSidebarContent"] {{
-    flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
-    overflow-y: auto; /* Habilita el scroll vertical si el contenido excede el espacio */
-    padding-top: 5px; /* Reducido a 5px */
-    padding-bottom: 5px; /* Reducido a 5px */
+    padding-top: 20px;
     padding-left: 0px;
     padding-right: 0px;
 }}
 
-/* Título en el sidebar */
-[data-testid="stSidebarContent"] h1 {{
+/* Title in the sidebar */
+[data-testid="stSidebar"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 0.3rem; /* Margen inferior aún más reducido */
-    font-size: 1.4rem; /* Título un poco más pequeño */
-    padding: 0 10px; /* Padding horizontal ligeramente reducido */
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    padding: 0 20px;
 }}
 
-/* Contenedor del grupo de radio buttons */
-[data-testid="stSidebarContent"] .stRadio div[role="radiogroup"] {{
+/* Ensure the radio group container fills the width */
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
     width: 100%;
     padding: 0;
 }}
 
-/* Cada opción del menú (el área clicable) */
-[data-testid="stSidebarContent"] .stRadio label {{
-    font-size: 0.85rem; /* TAMAÑO DE TEXTO AÚN MÁS PEQUEÑO para maximizar espacio */
+/* Each radio option label (the clickable area) */
+[data-testid="stSidebar"] .stRadio label {{
+    font-size: 1rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7) !important; /* Blanco ligeramente desvanecido */
-    padding: 2px 10px !important; /* REDUCIDO AL MÍNIMO ABSOLUTO */
-    margin-bottom: 0px !important;
-    border-radius: 0px !important;
+    color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
+    padding: 12px 20px !important; /* Increased padding for better click area */
+    margin-bottom: 0px !important; /* Remove space between items */
+    border-radius: 0px !important; /* Sharp corners like the example */
     transition: background-color 0.2s ease, color 0.2s ease;
-    display: flex !important;
+    display: flex !important; /* Use flexbox for icon/text alignment */
     align-items: center !important;
-    width: 100% !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil */
+    width: 100% !important; /* Ensure it takes full width */
 }}
 
-/* Eliminar la línea del último elemento del menú */
-[data-testid="stSidebarContent"] .stRadio label:last-child {{
-    border-bottom: none !important;
-}}
-
-/* Estado hover (cuando el ratón está encima) */
-[data-testid="stSidebarContent"] .stRadio label:hover {{
-    background-color: #2D3E5E !important; /* Fondo más claro en hover */
-    color: white !important; /* Texto blanco puro en hover */
+/* Hover state for menu options */
+[data-testid="stSidebar"] .stRadio label:hover {{
+    background-color: #2D3E5E !important; /* Lighter background on hover */
+    color: white !important; /* Pure white text on hover */
     cursor: pointer !important;
 }}
 
-/* Estado seleccionado (activo) */
-[data-testid="stSidebarContent"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
-    background-color: #0E1629 !important; /* Fondo más oscuro para el elemento seleccionado */
-    color: white !important; /* Texto blanco puro para el elemento seleccionado */
-    font-weight: 600 !important; /* Ligeramente más negrita */
+/* Selected (active) state for menu options */
+[data-testid="stSidebar"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
+    background-color: #0E1629 !important; /* Darker background for selected item */
+    color: white !important; /* Pure white text for selected item */
+    font-weight: 600 !important; /* Slightly bolder */
 }}
 
-/* Ocultar el círculo nativo del radio button */
-[data-testid="stSidebarContent"] .stRadio label > div:first-child {{
+/* This is the key to remove the native radio bullet point/circle */
+/* Target the div that contains the actual radio input element */
+[data-testid="stSidebar"] .stRadio label > div:first-child {{
     display: none !important;
 }}
 
-/* Alineación de íconos/emojis con el texto */
-[data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
+/* If using markdown in label (for emojis/icons), ensure it's aligned */
+[data-testid="stSidebar"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
-    gap: 5px; /* Espacio entre el ícono y el texto, aún más reducido */
+    gap: 10px; /* Space between icon and text */
 }}
 
-/* --- ESTILOS PARA CONTROLES DEL MAPA GIS (NO SE TOCAN) --- */
+/* --- NEW / UPDATED STYLES FOR GIS MAP CONTROLS --- */
 
 /* Style for selectbox labels */
 div.stSelectbox > label {{
@@ -271,6 +258,7 @@ div.stSelectbox > label {{
 
 </style>
 """, unsafe_allow_html=True)
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -278,7 +266,7 @@ def login():
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
-            <img src="data:image:png;base64,{logo_base64}" alt="ADR Logo">
+            <img src="data:image/png;base64,{logo_base64}" alt="ADR Logo">
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -373,59 +361,20 @@ def dashboard():
 
     # --- Contenido principal basado en la selección del menú ---
     if st.session_state.menu_selection == "Tablero":
-        st.title("🏠 Tablero de Control")
-        st.write("Bienvenido al tablero principal de PolarisWEB. Aquí puedes ver un resumen del estado de tu red de monitoreo.")
-
-        st.markdown("---")
-        st.header("Métricas Clave")
-        col_m1, col_m2, col_m3 = st.columns(3)
-        with col_m1:
-            st.metric(label="Estaciones Activas", value="15 / 20", delta="↑ 2 en 24h")
-        with col_m2:
-            st.metric(label="Alarmas Activas", value="3", delta="↑ 1 nueva")
-        with col_m3:
-            st.metric(label="Última Actualización", value=datetime.datetime.now().strftime("%H:%M:%S"), delta="Hace 1 minuto")
-
-        st.markdown("---")
-        st.header("Precipitación Total Últimas 24h")
-        # Datos de ejemplo para el gráfico
-        data_precip = pd.DataFrame({
-            "Hora": pd.to_datetime(pd.date_range(end=datetime.datetime.now(), periods=24, freq='H')),
-            "Precipitación (mm)": [i * 0.5 + (i % 5) for i in range(24)]
-        })
-        fig_precip = px.area(data_precip, x="Hora", y="Precipitación (mm)", title="Acumulado de Precipitación Horaria",
-                             labels={"Precipitación (mm)": "Precipitación (mm)"})
-        st.plotly_chart(fig_precip, use_container_width=True)
-
-
+        st.title("Tablero de Control")
+        st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
     elif st.session_state.menu_selection == "GIS":
-        st.title("🌐 Información Geográfica")
-        st.write("Esta sección provee herramientas avanzadas de análisis geográfico y gestión de capas GIS.")
-        st.info("Aquí se podrían cargar y superponer diferentes capas GIS (hidrográficas, geológicas, límites administrativos, etc.) para análisis complejos.")
-        st.subheader("Opciones Avanzadas GIS")
-        st.checkbox("Mostrar capas hidrográficas")
-        st.checkbox("Mostrar zonas de riesgo")
-        st.selectbox("Seleccionar tipo de mapa base", ["Satélite", "Calles", "Topográfico"])
-
-
+        st.title("Información Geográfica")
+        st.write("Explora datos GIS relevantes para tus proyectos.")
     elif st.session_state.menu_selection == "Mapa GIS":
-        st.subheader("🗺️ Mapa GIS de Estaciones")
+        st.subheader("Mapa GIS")
 
         # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
         col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8])
 
         with col1:
             st.caption("Buscar estación")
-            try:
-                df_stations = pd.read_csv("estaciones.csv")
-                station_names = ["Todas las estaciones"] + list(df_stations["nombre"].unique())
-            except FileNotFoundError:
-                st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
-                station_names = ["Todas las estaciones"] # Fallback
-            except KeyError:
-                st.error("Error: Columna 'nombre' no encontrada en 'estaciones.csv'.")
-                station_names = ["Todas las estaciones"] # Fallback
-
+            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -455,11 +404,18 @@ def dashboard():
         # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
+            
+            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
+            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
 
+            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
+            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                df['estado'] = 'indefinido' # Default para evitar errores si la columna no existe
+                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
+                df['estado'] = 'indefinido'
 
+            # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
                 filtered_df = df[df['estado'] == 'activa']
             elif filter_option == "Inactivas":
@@ -467,35 +423,24 @@ def dashboard():
             else:
                 filtered_df = df
 
+            # Lógica de búsqueda de estación (simple por nombre)
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            # Esto se puede quitar si no se quiere mostrar la tabla de datos del mapa
-            # st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
-            # st.dataframe(filtered_df)
+            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
+            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
+            st.dataframe(filtered_df)
+            # ----------------------------------------------------------------------
 
+            # Define los colores basados en el estado
             def get_color(row):
-                if display_option == "Estado de las estaciones":
-                    return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
-                elif display_option == "Temperatura":
-                    # Ejemplo: Rojo para caliente, azul para frío
-                    temp = row.get('temperatura', 0) # Asegúrate de tener esta columna en CSV
-                    if temp > 25: return [255, 0, 0, 160] # Rojo
-                    elif temp < 10: return [0, 0, 255, 160] # Azul
-                    else: return [0, 200, 0, 160] # Verde
-                elif display_option == "Precipitación":
-                    # Ejemplo: Azul claro para poca, azul oscuro para mucha
-                    precip = row.get('precipitacion', 0) # Asegúrate de tener esta columna en CSV
-                    if precip > 10: return [0, 0, 150, 160] # Azul oscuro
-                    elif precip > 0: return [0, 150, 255, 160] # Azul claro
-                    else: return [150, 150, 150, 160] # Gris si no hay precipitación
-                return [200, 200, 0, 160] # Default si no se encuentra opción
+                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
 
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9', # Puedes probar otros estilos: dark-v10, satellite-streets-v11
+                map_style='mapbox://styles/mapbox/light-v9',
                 initial_view_state=pdk.ViewState(
-                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 40.4168, # Default Madrid si no hay datos
-                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else -3.7038, # Default Madrid si no hay datos
+                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
+                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
                     zoom=5,
                     pitch=50,
                 ),
@@ -505,171 +450,68 @@ def dashboard():
                         data=filtered_df,
                         get_position='[lon, lat]',
                         get_color=get_color,
-                        get_radius=2500, # Tamaño de los puntos
-                        pickable=True, # Hace los puntos clickeables
-                        auto_highlight=True,
+                        get_radius=2500,
                     ),
                 ],
             ))
 
-            st.write("Haz clic en los puntos del mapa para más detalles (funcionalidad de tooltip se implementaría con más complejidad en PyDeck).")
-
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
-            st.warning("Para el 'Mapa GIS', crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
-            st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
-
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas requeridas.")
-            st.warning("Para el 'Mapa GIS', crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
-            st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
 
 
     elif st.session_state.menu_selection == "Visor":
-        st.title("📊 Visor de Datos")
-        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo de tus estaciones.")
-
-        st.subheader("Selección de Datos")
-        col_v1, col_v2 = st.columns(2)
-        with col_v1:
-            try:
-                df_stations_viewer = pd.read_csv("estaciones.csv")
-                station_options = list(df_stations_viewer["nombre"].unique())
-            except FileNotFoundError:
-                station_options = ["Estación Demo"]
-                st.warning("Para el 'Visor', crea un archivo `estaciones.csv` con una columna `nombre`.")
-
-            selected_station = st.selectbox("Selecciona Estación", station_options)
-        with col_v2:
-            # Asumiendo que tenemos variables comunes para mostrar
-            variable_options = ["Temperatura", "Precipitación", "Humedad", "Nivel de Agua"]
-            selected_variable = st.selectbox("Selecciona Variable", variable_options)
-
-        st.subheader(f"Gráfico de {selected_variable} para {selected_station}")
-
-        # Datos de ejemplo para el visor
-        time_data = pd.DataFrame({
-            "Fecha/Hora": pd.to_datetime(pd.date_range(end=datetime.datetime.now(), periods=100, freq='H')),
-            selected_variable: [i + (i % 10) * 0.5 for i in range(100)]
-        })
-        fig_viewer = px.line(time_data, x="Fecha/Hora", y=selected_variable,
-                             title=f"Serie de Tiempo de {selected_variable}")
-        st.plotly_chart(fig_viewer, use_container_width=True)
-
-
+        st.title("Visor de Datos")
+        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo.")
     elif st.session_state.menu_selection == "Fast Viewer":
-        st.title("⚡ Fast Viewer")
-        st.write("Visualización rápida de datos en tiempo real (modo simplificado).")
-        st.info("Esta sección podría mostrar los datos más recientes de las estaciones críticas sin configuraciones adicionales.")
-        st.text_area("Datos en tiempo real (simulado)", "Estación A: Temp 22.5°C, Precip 0.0mm\nEstación B: Nivel 1.2m, Hum 78%\n...", height=200)
-
-
+        st.title("Visor Rápido")
+        st.write("Visualización rápida de datos en tiempo real.")
     elif st.session_state.menu_selection == "Estaciones":
-        st.title("📡 Gestión de Estaciones")
-        st.write("Administra y consulta información detallada de todas tus estaciones de monitoreo.")
-
-        st.subheader("Listado de Estaciones")
-        try:
-            df_all_stations = pd.read_csv("estaciones.csv")
-            # Añadir una columna de "Última Conexión" si no existe
-            if 'ultima_conexion' not in df_all_stations.columns:
-                df_all_stations['ultima_conexion'] = [
-                    (datetime.datetime.now() - datetime.timedelta(minutes=i*10)).strftime("%Y-%m-%d %H:%M:%S")
-                    for i in range(len(df_all_stations))
-                ]
-            st.dataframe(df_all_stations, use_container_width=True)
-        except FileNotFoundError:
-            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
-            st.warning("Crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
-            st.dataframe(pd.DataFrame({'nombre': ['Estación A', 'Estación B'], 'lat': [41.3, 42.0], 'lon': [2.1, 1.5], 'estado': ['activa', 'inactiva'], 'temperatura': [20, 15], 'precipitacion': [5, 0], 'ultima_conexion': [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), (datetime.datetime.now() - datetime.timedelta(hours=5)).strftime("%Y-%m-%d %H:%M:%S")]}))
-        except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas requeridas.")
-
-
+        st.title("Gestión de Estaciones")
+        st.write("Administra y consulta información de tus estaciones de monitoreo.")
     elif st.session_state.menu_selection == "Monitoring":
-        st.title("📈 Monitoreo en Tiempo Real")
-        st.write("Aquí puedes supervisar los parámetros clave de las estaciones en vivo.")
-        st.info("Implementar un panel de monitoreo con actualizaciones automáticas (requeriría backend o mecanismos de refresh).")
-
-
+        st.title("Monitoreo en Tiempo Real")
+        st.write("Sigue los parámetros clave en tiempo real.")
     elif st.session_state.menu_selection == "Informe personalizado":
-        st.title("📄 Informes Personalizados")
-        st.write("Genera informes a medida con los datos seleccionados y en el formato deseado.")
-        st.info("Secciones para selección de fechas, estaciones, variables, formatos de exportación (PDF, CSV).")
-
-
+        st.title("Informes Personalizados")
+        st.write("Genera informes a medida según tus necesidades.")
     elif st.session_state.menu_selection == "Informe rosa de los vientos":
-        st.title("💨 Informe Rosa de los Vientos")
-        st.write("Visualiza patrones de dirección y velocidad del viento para estaciones seleccionadas.")
-        st.info("Gráficos de rosa de los vientos para análisis meteorológicos.")
-
-
+        st.title("Informe Rosa de los Vientos")
+        st.write("Visualiza patrones de dirección y velocidad del viento.")
     elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title("🌧️ Análisis de Lluvias Consecutivas")
-        st.write("Herramientas para analizar eventos de lluvia prolongados y sus impactos.")
-        st.info("Cálculo de acumulados, intensidad y duración de eventos de lluvia.")
-
-
+        st.title("Análisis de Lluvias Consecutivas")
+        st.write("Herramientas para analizar eventos de lluvia prolongados.")
     elif st.session_state.menu_selection == "Vistas":
-        st.title("👁️ Vistas Predefinidas")
-        st.write("Carga y guarda configuraciones de visualización de datos y paneles.")
-        st.info("Permite a los usuarios guardar y acceder rápidamente a sus configuraciones de gráficos y tablas.")
-
-
+        st.title("Vistas Predefinidas")
+        st.write("Carga y guarda configuraciones de visualización de datos.")
     elif st.session_state.menu_selection == "Sinóptico":
-        st.title("🗺️ Diseñador de Sinópticos")
-        st.write("Crea o edita diagramas sinópticos interactivos de tus sistemas.")
-        st.info("Herramienta para diseñar representaciones visuales de la red con datos en vivo.")
-
-
+        st.title("Diseñador de Sinópticos")
+        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
     elif st.session_state.menu_selection == "Sinópticos":
-        st.title("🗺️ Sinópticos Existentes")
-        st.write("Lista y accede a tus diagramas sinópticos configurados.")
-        st.info("Panel de control para ver y lanzar los sinópticos creados.")
-
-
+        st.title("Sinópticos Existentes")
+        st.write("Lista de tus diagramas sinópticos.")
     elif st.session_state.menu_selection == "Custom Synoptics":
-        st.title("⚙️ Sinópticos Personalizados")
-        st.write("Gestiona tus sinópticos adaptados y específicos para tus necesidades.")
-        st.info("Funcionalidad para sinópticos con configuraciones avanzadas o específicas de usuario.")
-
-
+        st.title("Sinópticos Personalizados")
+        st.write("Gestiona tus sinópticos adaptados.")
     elif st.session_state.menu_selection == "Supervisor":
-        st.title("🧑‍💻 Panel de Supervisor")
-        st.write("Herramientas para la supervisión y gestión de usuarios y permisos del sistema.")
-        st.info("Control de acceso, roles de usuario y auditoría.")
-
-
+        st.title("Panel de Supervisor")
+        st.write("Herramientas para la supervisión y gestión de usuarios.")
     elif st.session_state.menu_selection == "Estadísticas de red":
-        st.title("📊 Estadísticas de la Red")
-        st.write("Consulta el rendimiento y estado general de tu red de monitoreo.")
-        st.info("Métricas de uptime, latencia, volumen de datos, etc.")
-
-
+        st.title("Estadísticas de la Red")
+        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
     elif st.session_state.menu_selection == "Registros":
-        st.title("📜 Historial de Registros")
-        st.write("Accede a los logs y registros de actividad detallados del sistema.")
-        st.info("Filtrado y búsqueda de logs para diagnóstico de problemas.")
-
-
+        st.title("Historial de Registros")
+        st.write("Accede a los logs y registros de actividad del sistema.")
     elif st.session_state.menu_selection == "Módulos":
-        st.title("📦 Administración de Módulos")
-        st.write("Activa y desactiva módulos de la aplicación para personalizar la experiencia.")
-        st.info("Interfaz para gestionar extensiones y funcionalidades adicionales.")
-
-
+        st.title("Administración de Módulos")
+        st.write("Activa y desactiva módulos de la aplicación.")
     elif st.session_state.menu_selection == "Túnel":
-        st.title("🔗 Configuración de Túnel")
-        st.write("Gestiona conexiones y túneles de comunicación seguros a tus dispositivos.")
-        st.info("Herramientas para configurar conexiones VPN o túneles SSH/TCP.")
-
-
+        st.title("Configuración de Túnel")
+        st.write("Gestiona conexiones y túneles de comunicación.")
     elif st.session_state.menu_selection == "Validador":
-        st.title("✅ Herramienta de Validación")
-        st.write("Valida la calidad y consistencia de tus datos de monitoreo.")
-        st.info("Reglas de validación, detección de outliers y corrección de datos.")
-
-
+        st.title("Herramienta de Validación")
+        st.write("Valida la calidad y consistencia de tus datos.")
     elif st.session_state.menu_selection == "Cerrar sesión":
         st.session_state.logged_in = False
         st.rerun()
@@ -678,5 +520,3 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-        
-    
