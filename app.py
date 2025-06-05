@@ -364,7 +364,9 @@ def dashboard():
 
     current_selected_display_option = st.session_state.menu_selection
     for opt in display_options:
-        if re.sub(r'^\S+\s+', '', opt) == st.session_state.menu_selection:
+        # Regex para limpiar el emoji y el espacio inicial para la comparación
+        clean_opt = re.sub(r'^\S+\s+', '', opt).strip()
+        if clean_opt == st.session_state.menu_selection:
             current_selected_display_option = opt
             break
 
@@ -378,7 +380,7 @@ def dashboard():
         label_visibility="collapsed"
     )
 
-    actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display)
+    actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display).strip()
 
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
@@ -436,7 +438,7 @@ def dashboard():
 
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                df['estado'] = 'indefinido'
+                df['estado'] = 'indefinido' # Asigna un valor por defecto si no existe
 
             # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
@@ -539,7 +541,4 @@ def dashboard():
     elif st.session_state.menu_selection == "Consecutive Rains":
         st.title("Análisis de Lluvias Consecutivas")
         st.write("Herramientas para analizar eventos de lluvia prolongados.")
-    elif st.session_state.menu_selection == "Vistas":
-        st.title("Vistas Predefinidas")
-        st.write("Carga y guarda configuraciones de visualización de datos.")
-    elif st.session_stat
+    elif st.session_state.me
