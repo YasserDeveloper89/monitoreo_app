@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import base64
-import re # Para el manejo de emojis en el menú
+import re
 
 USERS = {"admin": "1234"}
 
@@ -171,7 +171,7 @@ div.stTextInput > div > input::placeholder {{
     gap: 10px; /* Space between icon and text */
 }}
 
-/* --- NEW STYLES FOR GIS MAP CONTROLS --- */
+/* --- NEW / UPDATED STYLES FOR GIS MAP CONTROLS --- */
 
 /* Style for selectbox labels */
 div.stSelectbox > label {{
@@ -233,9 +233,20 @@ div.stSelectbox > label {{
     background-color: #1c7ed6 !important;
 }}
 
-/* Adjust margins for column layout in GIS Map */
-.st-emotion-cache-1jm692t {{ /* This class might change, requires inspection */
+/* Adjust margins for column layout in GIS Map - Streamlit sometimes adds extra space */
+.st-emotion-cache-1jm692t, .st-emotion-cache-1jm692t > div {{
     margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}}
+.st-emotion-cache-1c7y2vl {{ /* This targets the columns internal padding */
+    padding-bottom: 0px !important;
+}}
+
+/* Specific adjustments for the PyDeck map container itself */
+.stDeckGlJsonChart {{
+    border-radius: 10px; /* Rounded corners for the map */
+    overflow: hidden; /* Ensures corners are respected */
+    margin-top: 1rem; /* Space between controls and map */
 }}
 
 </style>
@@ -300,18 +311,18 @@ def dashboard():
         elif opt == "GIS": display_options.append("🌐 GIS")
         elif opt == "Mapa GIS": display_options.append("🗺️ Mapa GIS")
         elif opt == "Visor": display_options.append("📊 Visor")
-        elif opt == "Fast Viewer": display_options.append("⚡ Fast Viewer") # Nuevo emoji
-        elif opt == "Estaciones": display_options.append("📡 Estaciones") # Nuevo emoji
-        elif opt == "Monitoring": display_options.append("📈 Monitoring") # Nuevo emoji
-        elif opt == "Informe personalizado": display_options.append("📄 Informe personalizado") # Nuevo emoji
-        elif opt == "Informe rosa de los vientos": display_options.append("💨 Informe rosa de los vientos") # Nuevo emoji
-        elif opt == "Consecutive Rains": display_options.append("🌧️ Consecutive Rains") # Nuevo emoji
-        elif opt == "Vistas": display_options.append("👁️ Vistas") # Nuevo emoji
-        elif opt == "Sinóptico": display_options.append("🗺️ Sinóptico") # Nuevo emoji
-        elif opt == "Sinópticos": display_options.append("🗺️ Sinópticos") # Nuevo emoji
-        elif opt == "Custom Synoptics": display_options.append("⚙️ Custom Synoptics") # Nuevo emoji
+        elif opt == "Fast Viewer": display_options.append("⚡ Fast Viewer")
+        elif opt == "Estaciones": display_options.append("📡 Estaciones")
+        elif opt == "Monitoring": display_options.append("📈 Monitoring")
+        elif opt == "Informe personalizado": display_options.append("📄 Informe personalizado")
+        elif opt == "Informe rosa de los vientos": display_options.append("💨 Informe rosa de los vientos")
+        elif opt == "Consecutive Rains": display_options.append("🌧️ Consecutive Rains")
+        elif opt == "Vistas": display_options.append("👁️ Vistas")
+        elif opt == "Sinóptico": display_options.append("🗺️ Sinóptico")
+        elif opt == "Sinópticos": display_options.append("🗺️ Sinópticos")
+        elif opt == "Custom Synoptics": display_options.append("⚙️ Custom Synoptics")
         elif opt == "Supervisor": display_options.append("🧑‍💻 Supervisor")
-        elif opt == "Estadísticas de red": display_options.append("📊 Estadísticas de red") # Nuevo emoji
+        elif opt == "Estadísticas de red": display_options.append("📊 Estadísticas de red")
         elif opt == "Registros": display_options.append("📜 Registros")
         elif opt == "Módulos": display_options.append("📦 Módulos")
         elif opt == "Túnel": display_options.append("🔗 Túnel")
@@ -349,52 +360,53 @@ def dashboard():
         st.title("Información Geográfica")
         st.write("Explora datos GIS relevantes para tus proyectos.")
     elif st.session_state.menu_selection == "Mapa GIS":
-        st.subheader("Mapa GIS") # Cambiado a h2 para la apariencia del ejemplo
+        st.subheader("Mapa GIS")
 
         # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
-        # Usamos columns para organizar los selectbox y el botón
-        col1, col2, col3, col4 = st.columns([2, 2, 2, 0.8]) # Ajusta las proporciones
+        col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8])
 
         with col1:
-            st.caption("Buscar estación") # Título pequeño
+            st.caption("Buscar estación")
+            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
             search_station = st.selectbox(
                 "Search Station",
-                ("Todas las estaciones", "Estación A", "Estación B"), # Ejemplo de opciones
-                label_visibility="collapsed" # Oculta la etiqueta por defecto del selectbox
+                station_names,
+                label_visibility="collapsed"
             )
 
         with col2:
-            st.caption("Filtrar") # Título pequeño
+            st.caption("Filtrar")
             filter_option = st.selectbox(
                 "Filter Options",
-                ("Todas", "Activas", "Inactivas"), # Ejemplo de opciones
+                ("Todas", "Activas", "Inactivas"),
                 label_visibility="collapsed"
             )
 
         with col3:
-            st.caption("Mostrar") # Título pequeño
+            st.caption("Mostrar")
             display_option = st.selectbox(
                 "Display Options",
-                ("Estado de las estaciones", "Temperatura", "Precipitación"), # Ejemplo de opciones
+                ("Estado de las estaciones", "Temperatura", "Precipitación"),
                 label_visibility="collapsed"
             )
 
         with col4:
-            # Botón con icono de filtro
-            # Utiliza un espacio vacío para que el botón se alinee visualmente
-            st.markdown("<p style='margin-bottom:0.5rem; color: transparent;'>.</p>", unsafe_allow_html=True) # Pequeño truco para el espacio
-            st.button("☰", key="filter_button") # Icono de hamburguesa/filtro
+            st.markdown("<p style='margin-bottom:0.5rem; color: transparent;'>.</p>", unsafe_allow_html=True)
+            st.button("☰", key="filter_button")
 
         # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
             
-            # --- ASUMIMOS UNA COLUMNA 'estado' EN estaciones.csv ---
-            # Si no tienes esta columna, el código necesitará ser adaptado.
-            # Ejemplo: df['estado'] = ['activa', 'inactiva'] * (len(df) // 2) # Para probar
+            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
+            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
+
+            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
+            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
-                st.warning("La columna 'estado' no se encontró en 'estaciones.csv'. Las estaciones se mostrarán todas en un solo color.")
-                df['estado'] = 'activa' # Default para evitar errores
+                st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
+                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
+                df['estado'] = 'indefinido'
 
             # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
@@ -404,22 +416,25 @@ def dashboard():
             else:
                 filtered_df = df
 
-            # Lógica de búsqueda de estación (simple por nombre, puedes expandir)
+            # Lógica de búsqueda de estación (simple por nombre)
             if search_station != "Todas las estaciones":
-                filtered_df = filtered_df[filtered_df['nombre'] == search_station] # Asume una columna 'nombre'
+                filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            # Define los colores basados en el estado (verde para activa, gris para inactiva)
-            # Esto se aplica a cada fila del DataFrame para obtener el color RGB
+            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
+            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
+            st.dataframe(filtered_df)
+            # ----------------------------------------------------------------------
+
+            # Define los colores basados en el estado
             def get_color(row):
                 return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
 
-            # Crear el pydeck layer con colores dinámicos
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9', # Un estilo Mapbox neutro y claro
+                map_style='mapbox://styles/mapbox/light-v9',
                 initial_view_state=pdk.ViewState(
                     latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
                     longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
-                    zoom=6,
+                    zoom=5,
                     pitch=50,
                 ),
                 layers=[
@@ -427,18 +442,16 @@ def dashboard():
                         'ScatterplotLayer',
                         data=filtered_df,
                         get_position='[lon, lat]',
-                        # Usa get_color para aplicar colores dinámicos basados en la columna 'estado'
                         get_color=get_color,
                         get_radius=2500,
                     ),
                 ],
             ))
-            # --- FIN DEL MAPA GIS ---
 
         except FileNotFoundError:
-            st.error("Error: 'estaciones.csv' no encontrado. No se puede cargar el mapa.")
+            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'lat', 'lon', 'nombre' y 'estado'.")
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
 
 
     elif st.session_state.menu_selection == "Visor":
@@ -500,4 +513,3 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-        
