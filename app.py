@@ -124,8 +124,8 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] {{
     flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
     overflow-y: auto; /* Habilita el scroll vertical si el contenido excede el espacio */
-    padding-top: 10px; /* Ajuste para el título, un poco menos */
-    padding-bottom: 10px; /* Espacio al final del menú, un poco menos */
+    padding-top: 5px; /* Reducido a 5px */
+    padding-bottom: 5px; /* Reducido a 5px */
     padding-left: 0px;
     padding-right: 0px;
 }}
@@ -134,9 +134,9 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 0.5rem; /* Margen inferior aún más reducido */
-    font-size: 1.5rem; /* Título un poco más pequeño */
-    padding: 0 15px; /* Padding horizontal ligeramente reducido */
+    margin-bottom: 0.3rem; /* Margen inferior aún más reducido */
+    font-size: 1.4rem; /* Título un poco más pequeño */
+    padding: 0 10px; /* Padding horizontal ligeramente reducido */
 }}
 
 /* Contenedor del grupo de radio buttons */
@@ -147,10 +147,10 @@ div.stTextInput > div > input::placeholder {{
 
 /* Cada opción del menú (el área clicable) */
 [data-testid="stSidebarContent"] .stRadio label {{
-    font-size: 0.9rem; /* TAMAÑO DE TEXTO AÚN MÁS PEQUEÑO para maximizar espacio */
+    font-size: 0.85rem; /* TAMAÑO DE TEXTO AÚN MÁS PEQUEÑO para maximizar espacio */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7) !important; /* Blanco ligeramente desvanecido */
-    padding: 3px 15px !important; /* REDUCIDO AL MÍNIMO para que quepan todos los elementos */
+    padding: 2px 10px !important; /* REDUCIDO AL MÍNIMO ABSOLUTO */
     margin-bottom: 0px !important;
     border-radius: 0px !important;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -188,7 +188,7 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
-    gap: 7px; /* Espacio entre el ícono y el texto, un poco más reducido */
+    gap: 5px; /* Espacio entre el ícono y el texto, aún más reducido */
 }}
 
 /* --- ESTILOS PARA CONTROLES DEL MAPA GIS (NO SE TOCAN) --- */
@@ -520,7 +520,7 @@ def dashboard():
             st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
 
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas requeridas.")
             st.warning("Para el 'Mapa GIS', crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
             st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
 
@@ -674,4 +674,9 @@ def dashboard():
         st.session_state.logged_in = False
         st.rerun()
 
-if st.session_state.log
+if st.session_state.logged_in:
+    dashboard()
+else:
+    login()
+        
+    
