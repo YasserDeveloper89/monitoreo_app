@@ -36,6 +36,7 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    overflow-y: auto; /* Allow scrolling for content */
 }}
 
 /* Logo container styles */
@@ -52,12 +53,12 @@ st.markdown(f"""
     margin: 0 auto;
 }}
 
-/* General H1 styles */
-h1 {{
+/* General H1 and H2 styles for content pages */
+h1, h2, h3 {{
     color: white;
     text-align: center;
-    margin-top: 4rem;
-    margin-bottom: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
 }}
 
 /* Button styles */
@@ -171,69 +172,78 @@ div.stTextInput > div > input::placeholder {{
     gap: 10px; /* Space between icon and text */
 }}
 
-/* --- NEW / UPDATED STYLES FOR GIS MAP CONTROLS --- */
+/* --- GENERAL FORM STYLES FOR CONTENT PAGES (Estaciones, Informe, Supervisor) --- */
+.stForm {{
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly visible background for forms */
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}}
+.stForm > div > div > label {{ /* Adjust label color inside forms */
+    color: white !important;
+}}
+.stForm h3 {{ /* Adjust title color inside forms */
+    color: white !important;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}}
 
-/* Style for selectbox labels */
+/* --- Selectbox styles (re-applied for consistency) --- */
 div.stSelectbox > label {{
     font-weight: 600;
     font-size: 1rem;
     margin-bottom: 0.5rem;
     display: block;
-    color: white; /* White label text */
+    color: white;
 }}
-
-/* Style for selectbox dropdown input area */
 .stSelectbox [data-testid="stSelectboxProcessedOptions"] {{
-    background-color: rgba(255, 255, 255, 0.15) !important; /* Semi-transparent dark background */
+    background-color: rgba(255, 255, 255, 0.15) !important;
     border-radius: 8px !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: white !important;
     padding: 0.5rem 1rem !important;
     font-size: 1rem !important;
 }}
-
-/* Style for selectbox options in dropdown */
 .stSelectbox ul {{
-    background-color: #2D3E5E !important; /* Darker background for dropdown options */
+    background-color: #2D3E5E !important;
     color: white !important;
     border-radius: 8px;
 }}
-
 .stSelectbox li:hover {{
-    background-color: #1A2437 !important; /* Slightly darker on hover */
+    background-color: #1A2437 !important;
     color: white !important;
 }}
-
 .stSelectbox li[aria-selected="true"] {{
-    background-color: #1E90FF !important; /* Blue for selected option */
+    background-color: #1E90FF !important;
     color: white !important;
 }}
 
-/* Style for the button with the filter icon */
+/* --- GIS Map Controls --- */
 .stButton[data-testid="baseButton-secondary"] > button {{
-    background-color: #1E90FF !important; /* Blue background */
+    background-color: #1E90FF !important;
     color: white !important;
     font-weight: 700;
     font-size: 1.2rem;
-    padding: 0.75rem 1rem !important; /* Adjusted padding */
+    padding: 0.75rem 1rem !important;
     border-radius: 10px !important;
     border: none !important;
-    width: auto !important; /* Auto width for the icon button */
-    min-width: 50px; /* Minimum width for the button */
+    width: auto !important;
+    min-width: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 38px; /* Match height of selectbox for alignment */
-    margin-top: 1.5rem; /* Align with selectboxes above */
+    height: 38px;
+    margin-top: 1.5rem;
 }}
-
 .stButton[data-testid="baseButton-secondary"] > button:hover {{
     background-color: #1c7ed6 !important;
 }}
 
-/* Adjust margins for column layout in GIS Map - Streamlit sometimes adds extra space */
+/* Adjust margins for column layout in GIS Map */
 .st-emotion-cache-1jm692t, .st-emotion-cache-1jm692t > div {{
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
@@ -244,9 +254,193 @@ div.stSelectbox > label {{
 
 /* Specific adjustments for the PyDeck map container itself */
 .stDeckGlJsonChart {{
-    border-radius: 10px; /* Rounded corners for the map */
-    overflow: hidden; /* Ensures corners are respected */
-    margin-top: 1rem; /* Space between controls and map */
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 1rem;
+}}
+
+/* --- NEW: GIS Map Legend Box --- */
+.gis-legend-box {{
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    border-radius: 8px;
+    padding: 15px;
+    position: absolute; /* Position over the map */
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 1000; /* Ensure it's above the map */
+    color: #333; /* Dark text for readability on light background */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    max-width: 250px; /* Limit width */
+}}
+.gis-legend-box h4 {{
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}}
+.legend-item {{
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}}
+.legend-color-box {{
+    width: 15px;
+    height: 15px;
+    border-radius: 50%; /* Circular for points */
+    margin-right: 8px;
+    flex-shrink: 0;
+}}
+.legend-count {{
+    margin-left: auto;
+    font-weight: bold;
+}}
+
+/* --- NEW: Text Input with Search Icon (Nuevo informe personalizado) --- */
+.search-input-container {{
+    position: relative;
+    margin-bottom: 1.5rem;
+}}
+.search-input-container input {{
+    padding-right: 35px !important; /* Space for icon */
+}}
+.search-input-icon {{
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none; /* Don't block input clicks */
+}}
+.search-input-container label {{ /* Adjust label for these search inputs */
+    color: white !important;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}}
+
+/* --- NEW: Buttons for "Nuevo informe personalizado" LISTAR section --- */
+.list-buttons-container {{
+    display: flex;
+    justify-content: flex-end; /* Align to the right */
+    gap: 10px; /* Space between buttons */
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}}
+.list-buttons-container button {{
+    width: auto !important; /* Allow buttons to size to content */
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 5px !important;
+}}
+/* Specific styles for "Añadir Todos..." and "Añadir Todos los val" */
+.list-buttons-container button.st-emotion-cache-nahz7x {{ /* Default Streamlit button style */
+    background-color: #6C757D !important; /* Gray */
+}}
+.list-buttons-container button.st-emotion-cache-nahz7x:hover {{
+    background-color: #5a6268 !important;
+}}
+.list-buttons-container button.st-emotion-cache-nahz7x[data-testid="baseButton-secondary"]:nth-of-type(2) {{ /* Target the second button for green */
+    background-color: #28A745 !important; /* Green */
+}}
+.list-buttons-container button.st-emotion-cache-nahz7x[data-testid="baseButton-secondary"]:nth-of-type(2):hover {{
+    background-color: #218838 !important;
+}}
+/* Style for "Restablecer filtros" button */
+.reset-filter-button-container {{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}}
+.reset-filter-button-container button {{
+    background-color: #6C757D !important; /* Gray */
+    color: white !important;
+    width: auto !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 5px !important;
+}}
+.reset-filter-button-container button:hover {{
+    background-color: #5a6268 !important;
+}}
+
+/* --- NEW: Supervisor Tunnel specific styles --- */
+.supervisor-stats-container {{
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}}
+.stat-item {{
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+}}
+.stat-item .count {{
+    font-size: 1.5rem;
+    margin-right: 5px;
+}}
+.stat-connected {{ color: #28a745; }} /* Green */
+.stat-listening {{ color: #ffc107; }} /* Yellow */
+.stat-disconnected {{ color: #dc3545; }} /* Red */
+
+/* Export button for Supervisor Tunnel */
+.supervisor-export-button-container {{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}}
+.supervisor-export-button-container button {{
+    background-color: #1E90FF !important;
+    color: white !important;
+    width: auto !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+    border-radius: 5px !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}}
+.supervisor-export-button-container button:hover {{
+    background-color: #1c7ed6 !important;
+}}
+
+/* Dataframe styles - making them dark/transparent */
+[data-testid="stDataFrame"] {{
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 10px;
+    overflow: hidden; /* For rounded corners */
+}}
+[data-testid="stDataFrame"] table {{
+    background-color: transparent !important;
+    color: white !important;
+}}
+[data-testid="stDataFrame"] thead th {{
+    background-color: rgba(45, 62, 94, 0.8) !important; /* Darker header */
+    color: white !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+}}
+[data-testid="stDataFrame"] tbody tr {{
+    background-color: rgba(25, 34, 53, 0.6) !important; /* Darker row background */
+}}
+[data-testid="stDataFrame"] tbody tr:nth-child(even) {{
+    background-color: rgba(35, 48, 74, 0.6) !important; /* Slightly different for even rows */
+}}
+[data-testid="stDataFrame"] tbody tr:hover {{
+    background-color: rgba(60, 77, 107, 0.8) !important; /* Hover effect */
+}}
+[data-testid="stDataFrame"] td, [data-testid="stDataFrame"] th {{
+    border-color: rgba(255, 255, 255, 0.1) !important; /* Lighter borders for cells */
+    color: white !important;
+}}
+/* Pagination control for dataframe */
+[data-testid="stBlock"] .stSelectbox [data-testid="stSelectboxProcessedOptions"] {{
+    background-color: rgba(0,0,0,0.5) !important; /* Darker for this specific selectbox */
 }}
 
 </style>
@@ -359,18 +553,25 @@ def dashboard():
     elif st.session_state.menu_selection == "GIS":
         st.title("Información Geográfica")
         st.write("Explora datos GIS relevantes para tus proyectos.")
+
     elif st.session_state.menu_selection == "Mapa GIS":
         st.subheader("Mapa GIS")
 
         # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
-        col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8])
+        col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8]) # Adjusted proportions
 
         with col1:
             st.caption("Buscar estación")
-            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
+            # Dynamic station names from CSV
+            try:
+                all_station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
+            except FileNotFoundError:
+                all_station_names = ["Todas las estaciones", "Estación A", "Estación B", "Estación C"]
+                st.warning("`estaciones.csv` no encontrado. Usando datos de ejemplo para 'Buscar estación'.")
+
             search_station = st.selectbox(
                 "Search Station",
-                station_names,
+                all_station_names,
                 label_visibility="collapsed"
             )
 
@@ -392,23 +593,16 @@ def dashboard():
 
         with col4:
             st.markdown("<p style='margin-bottom:0.5rem; color: transparent;'>.</p>", unsafe_allow_html=True)
-            st.button("☰", key="filter_button")
+            st.button("☰", key="map_filter_button")
 
-        # --- LÓGICA DE FILTRADO PARA EL MAPA ---
+        # --- PyDeck Map Section ---
         try:
             df = pd.read_csv("estaciones.csv")
             
-            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
-            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
-
-            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
-            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
-                df['estado'] = 'indefinido'
+                df['estado'] = 'indefinido' # Fallback to prevent errors
 
-            # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
                 filtered_df = df[df['estado'] == 'activa']
             elif filter_option == "Inactivas":
@@ -416,100 +610,4 @@ def dashboard():
             else:
                 filtered_df = df
 
-            # Lógica de búsqueda de estación (simple por nombre)
-            if search_station != "Todas las estaciones":
-                filtered_df = filtered_df[filtered_df['nombre'] == search_station]
-
-            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
-            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
-            st.dataframe(filtered_df)
-            # ----------------------------------------------------------------------
-
-            # Define los colores basados en el estado
-            def get_color(row):
-                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
-
-            st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9',
-                initial_view_state=pdk.ViewState(
-                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
-                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
-                    zoom=5,
-                    pitch=50,
-                ),
-                layers=[
-                    pdk.Layer(
-                        'ScatterplotLayer',
-                        data=filtered_df,
-                        get_position='[lon, lat]',
-                        get_color=get_color,
-                        get_radius=2500,
-                    ),
-                ],
-            ))
-
-        except FileNotFoundError:
-            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
-        except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
-
-
-    elif st.session_state.menu_selection == "Visor":
-        st.title("Visor de Datos")
-        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo.")
-    elif st.session_state.menu_selection == "Fast Viewer":
-        st.title("Visor Rápido")
-        st.write("Visualización rápida de datos en tiempo real.")
-    elif st.session_state.menu_selection == "Estaciones":
-        st.title("Gestión de Estaciones")
-        st.write("Administra y consulta información de tus estaciones de monitoreo.")
-    elif st.session_state.menu_selection == "Monitoring":
-        st.title("Monitoreo en Tiempo Real")
-        st.write("Sigue los parámetros clave en tiempo real.")
-    elif st.session_state.menu_selection == "Informe personalizado":
-        st.title("Informes Personalizados")
-        st.write("Genera informes a medida según tus necesidades.")
-    elif st.session_state.menu_selection == "Informe rosa de los vientos":
-        st.title("Informe Rosa de los Vientos")
-        st.write("Visualiza patrones de dirección y velocidad del viento.")
-    elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title("Análisis de Lluvias Consecutivas")
-        st.write("Herramientas para analizar eventos de lluvia prolongados.")
-    elif st.session_state.menu_selection == "Vistas":
-        st.title("Vistas Predefinidas")
-        st.write("Carga y guarda configuraciones de visualización de datos.")
-    elif st.session_state.menu_selection == "Sinóptico":
-        st.title("Diseñador de Sinópticos")
-        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
-    elif st.session_state.menu_selection == "Sinópticos":
-        st.title("Sinópticos Existentes")
-        st.write("Lista de tus diagramas sinópticos.")
-    elif st.session_state.menu_selection == "Custom Synoptics":
-        st.title("Sinópticos Personalizados")
-        st.write("Gestiona tus sinópticos adaptados.")
-    elif st.session_state.menu_selection == "Supervisor":
-        st.title("Panel de Supervisor")
-        st.write("Herramientas para la supervisión y gestión de usuarios.")
-    elif st.session_state.menu_selection == "Estadísticas de red":
-        st.title("Estadísticas de la Red")
-        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
-    elif st.session_state.menu_selection == "Registros":
-        st.title("Historial de Registros")
-        st.write("Accede a los logs y registros de actividad del sistema.")
-    elif st.session_state.menu_selection == "Módulos":
-        st.title("Administración de Módulos")
-        st.write("Activa y desactiva módulos de la aplicación.")
-    elif st.session_state.menu_selection == "Túnel":
-        st.title("Configuración de Túnel")
-        st.write("Gestiona conexiones y túneles de comunicación.")
-    elif st.session_state.menu_selection == "Validador":
-        st.title("Herramienta de Validación")
-        st.write("Valida la calidad y consistencia de tus datos.")
-    elif st.session_state.menu_selection == "Cerrar sesión":
-        st.session_state.logged_in = False
-        st.rerun()
-
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
+            if search_stat
