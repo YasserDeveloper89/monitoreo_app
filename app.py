@@ -104,7 +104,6 @@ def login():
     if boton:
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
-            st.experimental_rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
     st.markdown("</div>", unsafe_allow_html=True)
@@ -144,7 +143,6 @@ def dashboard():
         st.line_chart(df[["temperatura", "precipitacion"]])
     elif opcion == "Cerrar sesión":
         st.session_state.logged_in = False
-        st.experimental_rerun()
 
 
 if "logged_in" not in st.session_state:
