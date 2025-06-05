@@ -269,7 +269,6 @@ div.stSelectbox > label {{
 
 </style>
 """, unsafe_allow_html=True)
-
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -426,7 +425,7 @@ def dashboard():
         # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
-            
+
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
                 df['estado'] = 'indefinido'
@@ -523,4 +522,12 @@ def dashboard():
     elif st.session_state.menu_selection == "Validador":
         st.title("Herramienta de Validación")
         st.write("Valida la calidad y consistencia de tus datos.")
-    e
+    elif st.session_state.menu_selection == "Cerrar sesión":
+        st.session_state.logged_in = False
+        st.rerun()
+
+if st.session_state.logged_in:
+    dashboard()
+else:
+    login()
+        
