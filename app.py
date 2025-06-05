@@ -35,7 +35,7 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
+    color: white !important; /* ¡CAMBIADO AQUI! */
 }}
 
 /* Logo container styles */
