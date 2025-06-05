@@ -6,7 +6,7 @@ import re
 
 USERS = {"admin": "1234"}
 
-st.set_page_config(page_title="Polaris Web", layout="centered")
+st.set_page_config(page_title="ADR Web", layout="centered")
 
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -35,7 +35,7 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white !important; /* ¡CAMBIADO AQUI! */
+    color: black !important; /* ¡CAMBIADO AQUI! */
 }}
 
 /* Logo container styles */
