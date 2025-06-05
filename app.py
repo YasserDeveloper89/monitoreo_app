@@ -398,11 +398,7 @@ def dashboard():
         try:
             df = pd.read_csv("estaciones.csv")
             
-            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
-            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
-
             # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
-            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
                 # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
@@ -420,14 +416,10 @@ def dashboard():
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
-            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
-            st.dataframe(filtered_df)
-            # ----------------------------------------------------------------------
-
             # Define los colores basados en el estado
+            # EL CAMBIO SE REALIZA AQUÍ: DE GRIS A ROJO PARA ESTACIONES INACTIVAS
             def get_color(row):
-                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                return [0, 150, 0, 160] if row['estado'] == 'activa' else [255, 0, 0, 160] # Verde vs Rojo
 
             st.pydeck_chart(pdk.Deck(
                 map_style='mapbox://styles/mapbox/light-v9',
@@ -451,7 +443,7 @@ def dashboard():
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon' y 'estado'.")
 
 
     elif st.session_state.menu_selection == "Visor":
@@ -513,4 +505,3 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-
