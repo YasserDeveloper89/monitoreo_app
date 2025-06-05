@@ -4,29 +4,27 @@ import pydeck as pdk
 import base64
 import re
 
-# --- Configuración de usuarios y la página ---
 USERS = {"admin": "1234"}
+
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
-# --- Funciones de utilidad para cargar imágenes ---
 def get_base64_of_bin_file(bin_file):
-    """
-    Convierte un archivo binario (ej. imagen) a una cadena base64.
-    Retorna la cadena base64 o una cadena vacía si el archivo no se encuentra.
-    """
-    try:
-        with open(bin_file, 'rb') as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    except FileNotFoundError:
-        print(f"Advertencia: '{bin_file}' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
-        return "" # Retorna una cadena vacía para que el CSS no falle
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
 
-# Cargar imágenes de fondo y logo
-img_base64 = get_base64_of_bin_file("fondo.jpg")
-logo_base64 = get_base64_of_bin_file("adrlogo.png")
+try:
+    img_base64 = get_base64_of_bin_file("fondo.jpg")
+except FileNotFoundError:
+    st.error("Error: 'fondo.jpg' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
+    img_base64 = ""
 
-# --- Estilos CSS inyectados en Streamlit ---
+try:
+    logo_base64 = get_base64_of_bin_file("adrlogo.png")
+except FileNotFoundError:
+    st.error("Error: 'adrlogo.png' no encontrado. Asegúrate de que el logo esté en el mismo directorio que el script.")
+    logo_base64 = ""
+
 st.markdown(f"""
 <style>
 /* Base container for the app view */
@@ -251,47 +249,13 @@ div.stSelectbox > label {{
     margin-top: 1rem; /* Space between controls and map */
 }}
 
-/* Style for Supervisor cards */
-.supervisor-card {{
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    min-height: 180px; /* Para mantener altura consistente */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}}
-
-.supervisor-card:hover {{
-    transform: translateY(-5px);
-    background-color: rgba(255, 255, 255, 0.15);
-}}
-
-.supervisor-card h3 {{
-    color: white;
-    margin-bottom: 5px;
-    font-size: 1.4rem;
-}}
-
-.supervisor-card p {{
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    margin-bottom: 0;
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
-# --- Lógica de autenticación ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
-    """Muestra la interfaz de inicio de sesión."""
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
@@ -303,7 +267,6 @@ def login():
 
     usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
     contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
-
     if st.button("Login"):
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
@@ -312,9 +275,7 @@ def login():
         else:
             st.error("Usuario o contraseña incorrectos.")
 
-# --- Función principal del Dashboard ---
 def dashboard():
-    """Muestra el dashboard de la aplicación con navegación lateral y contenido dinámico."""
     menu_options = [
         "Tablero",
         "GIS",
@@ -344,47 +305,50 @@ def dashboard():
 
     st.sidebar.title("Menú Principal")
 
-    display_options_map = {}
+    display_options = []
     for opt in menu_options:
-        if opt == "Tablero": display_options_map[opt] = "🏠 Tablero"
-        elif opt == "GIS": display_options_map[opt] = "🌐 GIS"
-        elif opt == "Mapa GIS": display_options_map[opt] = "🗺️ Mapa GIS"
-        elif opt == "Visor": display_options_map[opt] = "📊 Visor"
-        elif opt == "Fast Viewer": display_options_map[opt] = "⚡ Fast Viewer"
-        elif opt == "Estaciones": display_options_map[opt] = "📡 Estaciones"
-        elif opt == "Monitoring": display_options_map[opt] = "📈 Monitoring"
-        elif opt == "Informe personalizado": display_options_map[opt] = "📄 Informe personalizado"
-        elif opt == "Informe rosa de los vientos": display_options_map[opt] = "💨 Informe rosa de los vientos"
-        elif opt == "Consecutive Rains": display_options_map[opt] = "🌧️ Consecutive Rains"
-        elif opt == "Vistas": display_options_map[opt] = "👁️ Vistas"
-        elif opt == "Sinóptico": display_options_map[opt] = "🗺️ Sinóptico"
-        elif opt == "Sinópticos": display_options_map[opt] = "🗺️ Sinópticos"
-        elif opt == "Custom Synoptics": display_options_map[opt] = "⚙️ Custom Synoptics"
-        elif opt == "Supervisor": display_options_map[opt] = "🧑‍💻 Supervisor"
-        elif opt == "Estadísticas de red": display_options_map[opt] = "📊 Estadísticas de red"
-        elif opt == "Registros": display_options_map[opt] = "📜 Registros"
-        elif opt == "Módulos": display_options_map[opt] = "📦 Módulos"
-        elif opt == "Túnel": display_options_map[opt] = "🔗 Túnel"
-        elif opt == "Validador": display_options_map[opt] = "✅ Validador"
-        elif opt == "Cerrar sesión": display_options_map[opt] = "🚪 Cerrar sesión"
-        else: display_options_map[opt] = opt
+        if opt == "Tablero": display_options.append("🏠 Tablero")
+        elif opt == "GIS": display_options.append("🌐 GIS")
+        elif opt == "Mapa GIS": display_options.append("🗺️ Mapa GIS")
+        elif opt == "Visor": display_options.append("📊 Visor")
+        elif opt == "Fast Viewer": display_options.append("⚡ Fast Viewer")
+        elif opt == "Estaciones": display_options.append("📡 Estaciones")
+        elif opt == "Monitoring": display_options.append("📈 Monitoring")
+        elif opt == "Informe personalizado": display_options.append("📄 Informe personalizado")
+        elif opt == "Informe rosa de los vientos": display_options.append("💨 Informe rosa de los vientos")
+        elif opt == "Consecutive Rains": display_options.append("🌧️ Consecutive Rains")
+        elif opt == "Vistas": display_options.append("👁️ Vistas")
+        elif opt == "Sinóptico": display_options.append("🗺️ Sinóptico")
+        elif opt == "Sinópticos": display_options.append("🗺️ Sinópticos")
+        elif opt == "Custom Synoptics": display_options.append("⚙️ Custom Synoptics")
+        elif opt == "Supervisor": display_options.append("🧑‍💻 Supervisor")
+        elif opt == "Estadísticas de red": display_options.append("📊 Estadísticas de red")
+        elif opt == "Registros": display_options.append("📜 Registros")
+        elif opt == "Módulos": display_options.append("📦 Módulos")
+        elif opt == "Túnel": display_options.append("🔗 Túnel")
+        elif opt == "Validador": display_options.append("✅ Validador")
+        elif opt == "Cerrar sesión": display_options.append("🚪 Cerrar sesión")
+        else: display_options.append(opt)
 
-    options_for_radio = list(display_options_map.values())
+    current_selected_display_option = st.session_state.menu_selection
+    for opt in display_options:
+        if re.sub(r'^\S+\s+', '', opt) == st.session_state.menu_selection:
+            current_selected_display_option = opt
+            break
 
-    current_display_option = display_options_map.get(st.session_state.menu_selection, menu_options[0])
-    selected_index = options_for_radio.index(current_display_option)
+    selected_index = display_options.index(current_selected_display_option)
 
     selected_option_display = st.sidebar.radio(
         "Navegación",
-        options=options_for_radio,
+        options=display_options,
         index=selected_index,
         key="main_menu_radio",
         label_visibility="collapsed"
     )
 
-    actual_selected_option = next((key for key, value in display_options_map.items() if value == selected_option_display), None)
+    actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display)
 
-    if actual_selected_option and actual_selected_option != st.session_state.menu_selection:
+    if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
         st.rerun()
 
@@ -392,27 +356,18 @@ def dashboard():
     if st.session_state.menu_selection == "Tablero":
         st.title("Tablero de Control")
         st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
-
     elif st.session_state.menu_selection == "GIS":
         st.title("Información Geográfica")
         st.write("Explora datos GIS relevantes para tus proyectos.")
-
     elif st.session_state.menu_selection == "Mapa GIS":
         st.subheader("Mapa GIS")
 
+        # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
         col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8])
 
         with col1:
             st.caption("Buscar estación")
-            station_names = ["Todas las estaciones"]
-            try:
-                df_stations_load = pd.read_csv("estaciones.csv")
-                station_names.extend(list(df_stations_load["nombre"].unique()))
-            except FileNotFoundError:
-                st.warning("El archivo 'estaciones.csv' no fue encontrado para cargar nombres de estación.")
-            except KeyError:
-                st.warning("La columna 'nombre' no se encontró en 'estaciones.csv'.")
-
+            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -439,54 +394,65 @@ def dashboard():
             st.markdown("<p style='margin-bottom:0.5rem; color: transparent;'>.</p>", unsafe_allow_html=True)
             st.button("☰", key="filter_button")
 
+        # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
+            
+            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
+            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
 
+            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
+            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
+                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
                 df['estado'] = 'indefinido'
 
+            # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
-                filtered_df = df[df['estado'].str.lower() == 'activa']
+                filtered_df = df[df['estado'] == 'activa']
             elif filter_option == "Inactivas":
-                filtered_df = df[df['estado'].str.lower() == 'inactiva']
+                filtered_df = df[df['estado'] == 'inactiva']
             else:
                 filtered_df = df
 
+            # Lógica de búsqueda de estación (simple por nombre)
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            def get_color(row):
-                return [0, 150, 0, 160] if row['estado'].lower() == 'activa' else [100, 100, 100, 160]
+            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
+            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
+            st.dataframe(filtered_df)
+            # ----------------------------------------------------------------------
 
-            if not filtered_df.empty:
-                st.pydeck_chart(pdk.Deck(
-                    map_style='mapbox://styles/mapbox/light-v9',
-                    initial_view_state=pdk.ViewState(
-                        latitude=filtered_df["lat"].mean(),
-                        longitude=filtered_df["lon"].mean(),
-                        zoom=5,
-                        pitch=50,
+            # Define los colores basados en el estado
+            def get_color(row):
+                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+
+            st.pydeck_chart(pdk.Deck(
+                map_style='mapbox://styles/mapbox/light-v9',
+                initial_view_state=pdk.ViewState(
+                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
+                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
+                    zoom=5,
+                    pitch=50,
+                ),
+                layers=[
+                    pdk.Layer(
+                        'ScatterplotLayer',
+                        data=filtered_df,
+                        get_position='[lon, lat]',
+                        get_color=get_color,
+                        get_radius=2500,
                     ),
-                    layers=[
-                        pdk.Layer(
-                            'ScatterplotLayer',
-                            data=filtered_df,
-                            get_position='[lon, lat]',
-                            get_color=get_color,
-                            get_radius=2500,
-                        ),
-                    ],
-                ))
-            else:
-                st.warning("No hay estaciones para mostrar con los filtros aplicados.")
+                ],
+            ))
 
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon' y 'estado'.")
-        except Exception as e:
-            st.error(f"Ocurrió un error inesperado al cargar el mapa: {e}")
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
+
 
     elif st.session_state.menu_selection == "Visor":
         st.title("Visor de Datos")
@@ -494,45 +460,9 @@ def dashboard():
     elif st.session_state.menu_selection == "Fast Viewer":
         st.title("Visor Rápido")
         st.write("Visualización rápida de datos en tiempo real.")
-
     elif st.session_state.menu_selection == "Estaciones":
         st.title("Gestión de Estaciones")
         st.write("Administra y consulta información de tus estaciones de monitoreo.")
-
-        st.subheader("Filtros de Estaciones")
-        col_est1, col_est2, col_est3 = st.columns(3)
-        with col_est1:
-            # Corrección aquí: Cierre de comilla en "Todas las estaciones"
-            station_names_filter = ["Todas las estaciones"]
-            try:
-                df_stations_load = pd.read_csv("estaciones.csv")
-                station_names_filter.extend(list(df_stations_load["nombre"].unique()))
-            except FileNotFoundError:
-                pass
-            except KeyError:
-                pass
-            st.selectbox("Estación", station_names_filter, key="estacion_filter")
-            st.selectbox("Estado de la estación", ["Todos los estados", "Activa", "Inactiva", "Mantenimiento"], key="estado_estacion_filter")
-
-        with col_est2:
-            st.selectbox("Tipo de estación", ["Todos los tipos", "Meteorológica", "Hidrológica", "Calidad del Aire"], key="tipo_estacion_filter")
-            st.selectbox("ID red", ["Todas las redes", "Red A", "Red B"], key="id_red_filter")
-
-        with col_est3:
-            st.selectbox("Intervalo de transmisión", ["Todos los intervalos", "5 min", "15 min", "1 hora"], key="intervalo_transmision_filter")
-            st.text_input("Customer ID", placeholder="Introduce el ID del cliente", key="customer_id_filter")
-
-        st.button("Aplicar Filtros", key="aplicar_estaciones_filter_button", type="primary")
-
-        st.subheader("Lista de Estaciones")
-        try:
-            df_estaciones_raw = pd.read_csv("estaciones.csv")
-            st.dataframe(df_estaciones_raw, use_container_width=True)
-        except FileNotFoundError:
-            st.info("No se encontró el archivo 'estaciones.csv'. Por favor, asegúrate de que el archivo existe y contiene los datos de las estaciones.")
-        except Exception as e:
-            st.error(f"Error al cargar la lista de estaciones: {e}")
-
     elif st.session_state.menu_selection == "Monitoring":
         st.title("Monitoreo en Tiempo Real")
         st.write("Sigue los parámetros clave en tiempo real.")
@@ -543,4 +473,44 @@ def dashboard():
         st.title("Informe Rosa de los Vientos")
         st.write("Visualiza patrones de dirección y velocidad del viento.")
     elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title
+        st.title("Análisis de Lluvias Consecutivas")
+        st.write("Herramientas para analizar eventos de lluvia prolongados.")
+    elif st.session_state.menu_selection == "Vistas":
+        st.title("Vistas Predefinidas")
+        st.write("Carga y guarda configuraciones de visualización de datos.")
+    elif st.session_state.menu_selection == "Sinóptico":
+        st.title("Diseñador de Sinópticos")
+        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
+    elif st.session_state.menu_selection == "Sinópticos":
+        st.title("Sinópticos Existentes")
+        st.write("Lista de tus diagramas sinópticos.")
+    elif st.session_state.menu_selection == "Custom Synoptics":
+        st.title("Sinópticos Personalizados")
+        st.write("Gestiona tus sinópticos adaptados.")
+    elif st.session_state.menu_selection == "Supervisor":
+        st.title("Panel de Supervisor")
+        st.write("Herramientas para la supervisión y gestión de usuarios.")
+    elif st.session_state.menu_selection == "Estadísticas de red":
+        st.title("Estadísticas de la Red")
+        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
+    elif st.session_state.menu_selection == "Registros":
+        st.title("Historial de Registros")
+        st.write("Accede a los logs y registros de actividad del sistema.")
+    elif st.session_state.menu_selection == "Módulos":
+        st.title("Administración de Módulos")
+        st.write("Activa y desactiva módulos de la aplicación.")
+    elif st.session_state.menu_selection == "Túnel":
+        st.title("Configuración de Túnel")
+        st.write("Gestiona conexiones y túneles de comunicación.")
+    elif st.session_state.menu_selection == "Validador":
+        st.title("Herramienta de Validación")
+        st.write("Valida la calidad y consistencia de tus datos.")
+    elif st.session_state.menu_selection == "Cerrar sesión":
+        st.session_state.logged_in = False
+        st.rerun()
+
+if st.session_state.logged_in:
+    dashboard()
+else:
+    login()
+
