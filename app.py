@@ -170,7 +170,7 @@ div.stTextInput > div > input::placeholder {{
 }}
 
 /* Selected (active) state for menu options */
-[data-testid="stSidebar"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
+[data-testid="stSidebar"] .stRadio label[aria-checked="true"] {{
     background-color: #0E1629 !important; /* Darker background for selected item */
     color: white !important; /* Pure white text for selected item */
     font-weight: 600 !important; /* Slightly bolder */
@@ -267,26 +267,19 @@ div.stSelectbox > label {{
     margin-top: 1rem; /* Space between controls and map */
 }}
 
-/* NEW: Flexbox container for login elements to vertically center or align */
-.main-login-container {{
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Centra verticalmente el contenido */
-    align-items: center; /* Centra horizontalmente el contenido (para los elementos flex) */
-    min-height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la vista */
-    padding: 1rem; /* Añade un poco de padding para no pegar el contenido a los bordes */
-    box-sizing: border-box; /* Incluye el padding en el cálculo del ancho/alto */
-}}
-
 /* RE-ADJUST Streamlit's main content wrapper to center */
+/* This targets the column that contains your login elements in the center */
 [data-testid="stVerticalBlock"] {{
     max-width: 400px; /* Limita el ancho del formulario para que no se extienda demasiado */
     width: 90%; /* Ancho responsivo */
-    margin: auto; /* Centra el bloque verticalmente */
+    margin: auto; /* Centra el bloque horizontalmente */
+    /* Este es un ajuste clave para subir todo el bloque: */
+    margin-top: -10vh; /* Ajusta este valor negativamente para mover el bloque hacia arriba */
     padding: 20px; /* Añade padding interno para que el contenido no pegue a los bordes */
     background-color: rgba(0, 0, 0, 0.3); /* Un fondo sutil para el formulario en sí, si se quiere */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Puedes probar con un 'transform: translateY(-50px);' si el margin-top negativo no es suficiente */
 }}
 
 </style>
@@ -296,12 +289,6 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
-    # Añadimos un div contenedor para todo el contenido de login
-    # Esto es más bien para propósitos de CSS que Streamlit pueda inyectar directamente
-    # Streamlit ya envuelve el contenido en un stVerticalBlock por defecto,
-    # así que vamos a apuntar a ese test-id si es posible.
-    # No es necesario envolver aquí con markdown si los CSS apuntan a los elementos de Streamlit directamente.
-
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
@@ -310,8 +297,6 @@ def login():
         """, unsafe_allow_html=True)
     else:
         st.title("Polaris Web")
-
-    # Los elementos de st.text_input y st.button serán contenidos por un stVerticalBlock
 
     usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
     contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
@@ -510,4 +495,23 @@ def dashboard():
             initial_zoom = 5 if not filtered_df.empty else 10 # Zoom más cercano si hay datos
 
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/
+                map_style='mapbox://styles/mapbox/light-v9', # ¡CORRECCIÓN AQUÍ! Asegúrate de que la cadena está cerrada.
+                initial_view_state=pdk.ViewState(
+                    latitude=initial_latitude,
+                    longitude=initial_longitude,
+                    zoom=initial_zoom,
+                    pitch=50,
+                ),
+                layers=[
+                    pdk.Layer(
+                        'ScatterplotLayer',
+                        data=filtered_df,
+                        get_position='[lon, lat]',
+                        get_color=get_color,
+                        get_radius=2500,
+                        pickable=True, # Permite que los puntos sean clickeables
+                    ),
+                ],
+            ))
+
+        except FileNot
