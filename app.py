@@ -19,6 +19,15 @@ except FileNotFoundError:
     st.error("Error: 'fondo.jpg' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
     img_base64 = "" # Para evitar errores si la imagen no se encuentra
 
+# --- Nuevo código para el logo ---
+try:
+    logo_base64 = get_base64_of_bin_file("adrlogo.png")
+except FileNotFoundError:
+    st.error("Error: 'adrlogo.png' no encontrado. Asegúrate de que el logo esté en el mismo directorio que el script.")
+    logo_base64 = "" # Para evitar errores si la imagen no se encuentra
+
+# --- Fin del nuevo código para el logo ---
+
 st.markdown(f"""
 <style>
 [data-testid="stAppViewContainer"] {{
@@ -29,6 +38,20 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+}}
+
+/* Estilos para el logo */
+.logo-container {{
+    text-align: center;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+}}
+
+.logo-container img {{
+    max-width: 250px; /* Ajusta esto al tamaño deseado para tu logo */
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }}
 
 h1 {{
@@ -86,14 +109,24 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
-    st.title("Polaris Web")
+    # --- Cambio aquí: Sustituye st.title por st.markdown con el logo ---
+    if logo_base64: # Solo muestra el logo si se cargó correctamente
+        st.markdown(f"""
+        <div class="logo-container">
+            <img src="data:image/png;base64,{logo_base64}" alt="ADR Logo">
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.title("Polaris Web") # Fallback si el logo no se carga
+    # --- Fin del cambio ---
+
     usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
     contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
     if st.button("Login"):
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
             st.success("Sesión iniciada correctamente.")
-            st.rerun() # CAMBIO AQUÍ
+            st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
 
@@ -106,7 +139,6 @@ def dashboard():
         st.markdown("Bienvenido a Polaris Web, visualiza y analiza datos ambientales en tiempo real.")
     elif opcion == "Mapa":
         st.subheader("Estaciones en Mapa")
-        # Asegúrate de que 'estaciones.csv' exista en el mismo directorio o proporciona la ruta completa.
         try:
             df = pd.read_csv("estaciones.csv")
             st.pydeck_chart(pdk.Deck(
@@ -131,7 +163,6 @@ def dashboard():
             st.error("Error: 'estaciones.csv' no encontrado. No se puede cargar el mapa.")
     elif opcion == "Gráficos":
         st.subheader("Temperatura y Precipitación")
-        # Asegúrate de que 'estaciones.csv' exista en el mismo directorio o proporciona la ruta completa.
         try:
             df = pd.read_csv("estaciones.csv")
             st.line_chart(df[["temperatura", "precipitacion"]])
@@ -139,10 +170,10 @@ def dashboard():
             st.error("Error: 'estaciones.csv' no encontrado. No se pueden generar los gráficos.")
     elif opcion == "Cerrar sesión":
         st.session_state.logged_in = False
-        st.rerun() # CAMBIO AQUÍ
+        st.rerun()
 
 if st.session_state.logged_in:
     dashboard()
 else:
     login()
-            
+                     
