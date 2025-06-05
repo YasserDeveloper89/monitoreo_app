@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import base64
+import re # Para el manejo de emojis en el menú
 
 USERS = {"admin": "1234"}
 
@@ -170,6 +171,73 @@ div.stTextInput > div > input::placeholder {{
     gap: 10px; /* Space between icon and text */
 }}
 
+/* --- NEW STYLES FOR GIS MAP CONTROLS --- */
+
+/* Style for selectbox labels */
+div.stSelectbox > label {{
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: white; /* White label text */
+}}
+
+/* Style for selectbox dropdown input area */
+.stSelectbox [data-testid="stSelectboxProcessedOptions"] {{
+    background-color: rgba(255, 255, 255, 0.15) !important; /* Semi-transparent dark background */
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+}}
+
+/* Style for selectbox options in dropdown */
+.stSelectbox ul {{
+    background-color: #2D3E5E !important; /* Darker background for dropdown options */
+    color: white !important;
+    border-radius: 8px;
+}}
+
+.stSelectbox li:hover {{
+    background-color: #1A2437 !important; /* Slightly darker on hover */
+    color: white !important;
+}}
+
+.stSelectbox li[aria-selected="true"] {{
+    background-color: #1E90FF !important; /* Blue for selected option */
+    color: white !important;
+}}
+
+/* Style for the button with the filter icon */
+.stButton[data-testid="baseButton-secondary"] > button {{
+    background-color: #1E90FF !important; /* Blue background */
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 0.75rem 1rem !important; /* Adjusted padding */
+    border-radius: 10px !important;
+    border: none !important;
+    width: auto !important; /* Auto width for the icon button */
+    min-width: 50px; /* Minimum width for the button */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 38px; /* Match height of selectbox for alignment */
+    margin-top: 1.5rem; /* Align with selectboxes above */
+}}
+
+.stButton[data-testid="baseButton-secondary"] > button:hover {{
+    background-color: #1c7ed6 !important;
+}}
+
+/* Adjust margins for column layout in GIS Map */
+.st-emotion-cache-1jm692t {{ /* This class might change, requires inspection */
+    margin-bottom: 0 !important;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -226,59 +294,38 @@ def dashboard():
 
     st.sidebar.title("Menú Principal")
 
-    # Prepare options with emojis for display
     display_options = []
     for opt in menu_options:
-        if opt == "Tablero":
-            display_options.append("🏠 Tablero") # Add home emoji
-        elif opt == "GIS":
-            display_options.append("🌐 GIS") # Example globe emoji
-        elif opt == "Mapa GIS":
-            display_options.append("🗺️ Mapa GIS") # Example map emoji
-        elif opt == "Visor":
-            display_options.append("📊 Visor") # Example bar chart emoji
-        elif opt == "Supervisor":
-            display_options.append("🧑‍💻 Supervisor") # Example person emoji
-        elif opt == "Validador":
-            display_options.append("✅ Validador") # Example checkmark emoji
-        elif opt == "Registros":
-            display_options.append("📜 Registros") # Example scroll emoji
-        elif opt == "Módulos":
-            display_options.append("📦 Módulos") # Example box emoji
-        elif opt == "Túnel":
-            display_options.append("🔗 Túnel") # Example link emoji
-        elif opt == "Cerrar sesión":
-            display_options.append("🚪 Cerrar sesión") # Example door emoji
-        else:
-            display_options.append(opt)
+        if opt == "Tablero": display_options.append("🏠 Tablero")
+        elif opt == "GIS": display_options.append("🌐 GIS")
+        elif opt == "Mapa GIS": display_options.append("🗺️ Mapa GIS")
+        elif opt == "Visor": display_options.append("📊 Visor")
+        elif opt == "Fast Viewer": display_options.append("⚡ Fast Viewer") # Nuevo emoji
+        elif opt == "Estaciones": display_options.append("📡 Estaciones") # Nuevo emoji
+        elif opt == "Monitoring": display_options.append("📈 Monitoring") # Nuevo emoji
+        elif opt == "Informe personalizado": display_options.append("📄 Informe personalizado") # Nuevo emoji
+        elif opt == "Informe rosa de los vientos": display_options.append("💨 Informe rosa de los vientos") # Nuevo emoji
+        elif opt == "Consecutive Rains": display_options.append("🌧️ Consecutive Rains") # Nuevo emoji
+        elif opt == "Vistas": display_options.append("👁️ Vistas") # Nuevo emoji
+        elif opt == "Sinóptico": display_options.append("🗺️ Sinóptico") # Nuevo emoji
+        elif opt == "Sinópticos": display_options.append("🗺️ Sinópticos") # Nuevo emoji
+        elif opt == "Custom Synoptics": display_options.append("⚙️ Custom Synoptics") # Nuevo emoji
+        elif opt == "Supervisor": display_options.append("🧑‍💻 Supervisor")
+        elif opt == "Estadísticas de red": display_options.append("📊 Estadísticas de red") # Nuevo emoji
+        elif opt == "Registros": display_options.append("📜 Registros")
+        elif opt == "Módulos": display_options.append("📦 Módulos")
+        elif opt == "Túnel": display_options.append("🔗 Túnel")
+        elif opt == "Validador": display_options.append("✅ Validador")
+        elif opt == "Cerrar sesión": display_options.append("🚪 Cerrar sesión")
+        else: display_options.append(opt)
 
-
-    # Determine the index for the selected option in display_options
     current_selected_display_option = st.session_state.menu_selection
-    if st.session_state.menu_selection == "Tablero":
-        current_selected_display_option = "🏠 Tablero"
-    elif st.session_state.menu_selection == "GIS":
-        current_selected_display_option = "🌐 GIS"
-    elif st.session_state.menu_selection == "Mapa GIS":
-        current_selected_display_option = "🗺️ Mapa GIS"
-    elif st.session_state.menu_selection == "Visor":
-        current_selected_display_option = "📊 Visor"
-    elif st.session_state.menu_selection == "Supervisor":
-        current_selected_display_option = "🧑‍💻 Supervisor"
-    elif st.session_state.menu_selection == "Validador":
-        current_selected_display_option = "✅ Validador"
-    elif st.session_state.menu_selection == "Registros":
-        current_selected_display_option = "📜 Registros"
-    elif st.session_state.menu_selection == "Módulos":
-        current_selected_display_option = "📦 Módulos"
-    elif st.session_state.menu_selection == "Túnel":
-        current_selected_display_option = "🔗 Túnel"
-    elif st.session_state.menu_selection == "Cerrar sesión":
-        current_selected_display_option = "🚪 Cerrar sesión"
-
+    for opt in display_options:
+        if re.sub(r'^\S+\s+', '', opt) == st.session_state.menu_selection:
+            current_selected_display_option = opt
+            break
 
     selected_index = display_options.index(current_selected_display_option)
-
 
     selected_option_display = st.sidebar.radio(
         "Navegación",
@@ -288,11 +335,7 @@ def dashboard():
         label_visibility="collapsed"
     )
 
-    # Convert back to the original option name (removing emoji)
-    # This regex removes leading emojis and spaces.
-    import re
     actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display)
-
 
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
@@ -306,30 +349,98 @@ def dashboard():
         st.title("Información Geográfica")
         st.write("Explora datos GIS relevantes para tus proyectos.")
     elif st.session_state.menu_selection == "Mapa GIS":
-        st.subheader("Mapa GIS Interactivo")
-        st.write("Visualiza tus estaciones y datos en un mapa detallado.")
+        st.subheader("Mapa GIS") # Cambiado a h2 para la apariencia del ejemplo
+
+        # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
+        # Usamos columns para organizar los selectbox y el botón
+        col1, col2, col3, col4 = st.columns([2, 2, 2, 0.8]) # Ajusta las proporciones
+
+        with col1:
+            st.caption("Buscar estación") # Título pequeño
+            search_station = st.selectbox(
+                "Search Station",
+                ("Todas las estaciones", "Estación A", "Estación B"), # Ejemplo de opciones
+                label_visibility="collapsed" # Oculta la etiqueta por defecto del selectbox
+            )
+
+        with col2:
+            st.caption("Filtrar") # Título pequeño
+            filter_option = st.selectbox(
+                "Filter Options",
+                ("Todas", "Activas", "Inactivas"), # Ejemplo de opciones
+                label_visibility="collapsed"
+            )
+
+        with col3:
+            st.caption("Mostrar") # Título pequeño
+            display_option = st.selectbox(
+                "Display Options",
+                ("Estado de las estaciones", "Temperatura", "Precipitación"), # Ejemplo de opciones
+                label_visibility="collapsed"
+            )
+
+        with col4:
+            # Botón con icono de filtro
+            # Utiliza un espacio vacío para que el botón se alinee visualmente
+            st.markdown("<p style='margin-bottom:0.5rem; color: transparent;'>.</p>", unsafe_allow_html=True) # Pequeño truco para el espacio
+            st.button("☰", key="filter_button") # Icono de hamburguesa/filtro
+
+        # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
+            
+            # --- ASUMIMOS UNA COLUMNA 'estado' EN estaciones.csv ---
+            # Si no tienes esta columna, el código necesitará ser adaptado.
+            # Ejemplo: df['estado'] = ['activa', 'inactiva'] * (len(df) // 2) # Para probar
+            if 'estado' not in df.columns:
+                st.warning("La columna 'estado' no se encontró en 'estaciones.csv'. Las estaciones se mostrarán todas en un solo color.")
+                df['estado'] = 'activa' # Default para evitar errores
+
+            # Filtrar por estado si la opción no es 'Todas'
+            if filter_option == "Activas":
+                filtered_df = df[df['estado'] == 'activa']
+            elif filter_option == "Inactivas":
+                filtered_df = df[df['estado'] == 'inactiva']
+            else:
+                filtered_df = df
+
+            # Lógica de búsqueda de estación (simple por nombre, puedes expandir)
+            if search_station != "Todas las estaciones":
+                filtered_df = filtered_df[filtered_df['nombre'] == search_station] # Asume una columna 'nombre'
+
+            # Define los colores basados en el estado (verde para activa, gris para inactiva)
+            # Esto se aplica a cada fila del DataFrame para obtener el color RGB
+            def get_color(row):
+                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+
+            # Crear el pydeck layer con colores dinámicos
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9',
+                map_style='mapbox://styles/mapbox/light-v9', # Un estilo Mapbox neutro y claro
                 initial_view_state=pdk.ViewState(
-                    latitude=df["lat"].mean(),
-                    longitude=df["lon"].mean(),
+                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
+                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
                     zoom=6,
                     pitch=50,
                 ),
                 layers=[
                     pdk.Layer(
                         'ScatterplotLayer',
-                        data=df,
+                        data=filtered_df,
                         get_position='[lon, lat]',
-                        get_color='[0, 112, 255, 160]',
+                        # Usa get_color para aplicar colores dinámicos basados en la columna 'estado'
+                        get_color=get_color,
                         get_radius=2500,
                     ),
                 ],
             ))
+            # --- FIN DEL MAPA GIS ---
+
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. No se puede cargar el mapa.")
+        except KeyError as e:
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'lat', 'lon', 'nombre' y 'estado'.")
+
+
     elif st.session_state.menu_selection == "Visor":
         st.title("Visor de Datos")
         st.write("Accede a herramientas avanzadas para la visualización de series de tiempo.")
@@ -389,3 +500,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
+        
