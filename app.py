@@ -35,14 +35,29 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
+    color: white; /* Default text color, will be overridden by overlay */
+    position: relative; /* Needed for the overlay */
 }}
+
+/* Overlay for background image to ensure text legibility */
+[data-testid="stAppViewContainer"]::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay (50% opacity) */
+    z-index: -1; /* Place it behind content but in front of background image */
+}}
+
 
 /* Logo container styles */
 .logo-container {{
     text-align: center;
-    margin-top: 4rem;
-    margin-bottom: 2rem;
+    /* Reducimos el margen superior para subir el contenido */
+    margin-top: 2rem; /* Antes 4rem */
+    margin-bottom: 1.5rem; /* Antes 2rem */
 }}
 
 .logo-container img {{
@@ -56,8 +71,9 @@ st.markdown(f"""
 h1 {{
     color: white;
     text-align: center;
-    margin-top: 4rem;
-    margin-bottom: 2rem;
+    /* Reducimos el margen superior aquí también si no hay logo */
+    margin-top: 2rem; /* Antes 4rem */
+    margin-bottom: 1.5rem; /* Antes 2rem */
 }}
 
 /* Button styles */
@@ -84,19 +100,19 @@ div.stTextInput > label {{
     font-size: 1rem;
     margin-bottom: 0.5rem;
     display: block;
-    color: white;
+    color: white; /* Ensure labels are white and clearly visible */
 }}
 
 /* Text input field styles */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1.5rem !important; /* Mantenemos este margen para separar los campos */
     border-radius: 10px !important;
     border: none !important;
     font-size: 1rem !important;
     outline: none !important;
-    background-color: rgba(255, 255, 255, 0.25) !important;
+    background-color: rgba(255, 255, 255, 0.25) !important; /* Semi-transparent white background for input fields */
     color: white !important;
 }}
 
@@ -367,7 +383,25 @@ def dashboard():
 
         with col1:
             st.caption("Buscar estación")
-            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
+            # Simular estaciones.csv si no existe
+            try:
+                df_all_stations = pd.read_csv("estaciones.csv")
+            except FileNotFoundError:
+                st.warning("Archivo 'estaciones.csv' no encontrado. Se generarán datos de ejemplo.")
+                data = {
+                    'nombre': ['Estación A', 'Estación B', 'Estación C', 'Estación D', 'Estación E'],
+                    'lat': [41.3851, 41.4000, 41.3700, 41.3950, 41.3650],
+                    'lon': [2.1734, 2.1800, 2.1600, 2.1900, 2.1500],
+                    'temperatura': [25, 28, 22, 26, 21],
+                    'precipitacion': [10, 5, 12, 8, 3],
+                    'estado': ['activa', 'inactiva', 'activa', 'activa', 'inactiva']
+                }
+                df_all_stations = pd.DataFrame(data)
+                # Opcional: Guardar el CSV para futuras ejecuciones
+                # df_all_stations.to_csv("estaciones.csv", index=False)
+
+
+            station_names = ["Todas las estaciones"] + list(df_all_stations["nombre"].unique())
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -396,16 +430,11 @@ def dashboard():
 
         # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
-            df = pd.read_csv("estaciones.csv")
-            
-            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
-            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
+            df = df_all_stations.copy() # Usar una copia para no modificar el DataFrame original
 
             # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
-            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
-                st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
+                st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna. Se asignará un estado 'indefinido' por defecto.")
                 df['estado'] = 'indefinido'
 
             # Filtrar por estado si la opción no es 'Todas'
@@ -427,14 +456,33 @@ def dashboard():
 
             # Define los colores basados en el estado
             def get_color(row):
-                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                if display_option == "Estado de las estaciones":
+                    return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                elif display_option == "Temperatura":
+                    # Ejemplo: Gradiente de color para temperatura (azul a rojo)
+                    temp = row['temperatura']
+                    if temp < 15: return [0, 0, 255, 160] # Azul frío
+                    elif temp < 25: return [0, 200, 0, 160] # Verde templado
+                    else: return [255, 0, 0, 160] # Rojo cálido
+                elif display_option == "Precipitación":
+                    # Ejemplo: Gradiente de color para precipitación (amarillo a azul oscuro)
+                    precip = row['precipitacion']
+                    if precip < 5: return [255, 255, 0, 160] # Poca lluvia, amarillo
+                    elif precip < 10: return [0, 191, 255, 160] # Lluvia moderada, azul cielo
+                    else: return [0, 0, 128, 160] # Mucha lluvia, azul oscuro
+                return [255, 255, 255, 160] # Blanco por defecto si no coincide
+
+            # Calcula el centro del mapa dinámicamente o usa un valor por defecto si filtered_df está vacío
+            initial_latitude = filtered_df["lat"].mean() if not filtered_df.empty else 41.3851 # Centro de Barcelona
+            initial_longitude = filtered_df["lon"].mean() if not filtered_df.empty else 2.1734 # Centro de Barcelona
+            initial_zoom = 5 if not filtered_df.empty else 10 # Zoom más cercano si hay datos
 
             st.pydeck_chart(pdk.Deck(
                 map_style='mapbox://styles/mapbox/light-v9',
                 initial_view_state=pdk.ViewState(
-                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
-                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
-                    zoom=5,
+                    latitude=initial_latitude,
+                    longitude=initial_longitude,
+                    zoom=initial_zoom,
                     pitch=50,
                 ),
                 layers=[
@@ -444,6 +492,7 @@ def dashboard():
                         get_position='[lon, lat]',
                         get_color=get_color,
                         get_radius=2500,
+                        pickable=True, # Permite que los puntos sean clickeables
                     ),
                 ],
             ))
@@ -468,50 +517,4 @@ def dashboard():
         st.write("Sigue los parámetros clave en tiempo real.")
     elif st.session_state.menu_selection == "Informe personalizado":
         st.title("Informes Personalizados")
-        st.write("Genera informes a medida según tus necesidades.")
-    elif st.session_state.menu_selection == "Informe rosa de los vientos":
-        st.title("Informe Rosa de los Vientos")
-        st.write("Visualiza patrones de dirección y velocidad del viento.")
-    elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title("Análisis de Lluvias Consecutivas")
-        st.write("Herramientas para analizar eventos de lluvia prolongados.")
-    elif st.session_state.menu_selection == "Vistas":
-        st.title("Vistas Predefinidas")
-        st.write("Carga y guarda configuraciones de visualización de datos.")
-    elif st.session_state.menu_selection == "Sinóptico":
-        st.title("Diseñador de Sinópticos")
-        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
-    elif st.session_state.menu_selection == "Sinópticos":
-        st.title("Sinópticos Existentes")
-        st.write("Lista de tus diagramas sinópticos.")
-    elif st.session_state.menu_selection == "Custom Synoptics":
-        st.title("Sinópticos Personalizados")
-        st.write("Gestiona tus sinópticos adaptados.")
-    elif st.session_state.menu_selection == "Supervisor":
-        st.title("Panel de Supervisor")
-        st.write("Herramientas para la supervisión y gestión de usuarios.")
-    elif st.session_state.menu_selection == "Estadísticas de red":
-        st.title("Estadísticas de la Red")
-        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
-    elif st.session_state.menu_selection == "Registros":
-        st.title("Historial de Registros")
-        st.write("Accede a los logs y registros de actividad del sistema.")
-    elif st.session_state.menu_selection == "Módulos":
-        st.title("Administración de Módulos")
-        st.write("Activa y desactiva módulos de la aplicación.")
-    elif st.session_state.menu_selection == "Túnel":
-        st.title("Configuración de Túnel")
-        st.write("Gestiona conexiones y túneles de comunicación.")
-    elif st.session_state.menu_selection == "Validador":
-        st.title("Herramienta de Validación")
-        st.write("Valida la calidad y consistencia de tus datos.")
-    elif st.session_state.menu_selection == "Cerrar sesión":
-        st.session_state.logged_in = False
-        st.rerun()
-
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
-
-            
+        st.write("Genera informes a medida según tus neces
