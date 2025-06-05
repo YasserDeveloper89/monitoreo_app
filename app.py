@@ -96,6 +96,8 @@ def login():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
+        
+        # Título dentro del cuadro
         st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
 
         usuario = st.text_input("Nombre de usuario", key="user")
