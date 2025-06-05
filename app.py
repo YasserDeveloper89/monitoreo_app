@@ -14,34 +14,29 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file("fondo.jpg")
 
-# CSS global para la app
+# Estilos CSS
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-    body, html {{
-        margin: 0; padding: 0; height: 100%;
-        font-family: 'Roboto', sans-serif;
-    }}
-
-    .login-page {{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+    /* Fondo de toda la página */
+    .css-18e3th9 {{
         background-image: url("data:image/jpg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
+        height: 100vh;
+        font-family: 'Roboto', sans-serif;
     }}
 
-    /* Este es el contenedor que envolverá todo el login */
+    /* Cuadro negro semitransparente */
     .login-box {{
         background-color: rgba(0, 0, 0, 0.7);
         padding: 3rem 2.5rem;
         border-radius: 15px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-        width: 400px;
         color: white;
+        max-width: 400px;
+        margin: auto;
         text-align: center;
     }}
 
@@ -55,7 +50,7 @@ st.markdown(f"""
 
     /* Inputs */
     div.stTextInput > label {{
-        display: none;  /* ocultar etiquetas nativas para personalizar */
+        display: none;
     }}
 
     div.stTextInput > div > input {{
@@ -92,7 +87,7 @@ st.markdown(f"""
         background-color: #1c7ed6 !important;
     }}
 
-    /* Mensajes de éxito o error */
+    /* Mensajes */
     .stSuccess, .stError {{
         margin-top: 1rem;
         font-weight: 600;
@@ -102,13 +97,10 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 def login():
-    # Crear un contenedor con la clase login-page para fondo + centrado
-    with st.container():
-        st.markdown('<div class="login-page">', unsafe_allow_html=True)
-
-        # Dentro, otro div para el cuadro oscuro
+    # Usamos columnas para centrar verticalmente y horizontalmente
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
-
         st.markdown('<h1>Polaris Web</h1>', unsafe_allow_html=True)
 
         user = st.text_input("Usuario", key="user_input")
@@ -122,8 +114,7 @@ def login():
             else:
                 st.error("Usuario o contraseña incorrectos.")
 
-        st.markdown('</div>', unsafe_allow_html=True)  # cerrar login-box
-        st.markdown('</div>', unsafe_allow_html=True)  # cerrar login-page
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.get("logged_in", False):
         st.experimental_rerun()
