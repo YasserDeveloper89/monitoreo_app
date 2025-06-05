@@ -168,10 +168,6 @@ div.stTextInput > div > input::placeholder {{
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# Inicializa 'menu_selection' si no existe
-if "menu_selection" not in st.session_state:
-    st.session_state.menu_selection = "Inicio" # Opción por defecto al iniciar sesión
-
 def login():
     if logo_base64: # Solo muestra el logo si se cargó correctamente
         st.markdown(f"""
@@ -187,7 +183,9 @@ def login():
     if st.button("Login"):
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
-            st.success("Sesión iniciada correctamente.")
+            # Al iniciar sesión, seteamos la selección inicial del menú
+            # Aseguramos que 'Tablero' sea una opción válida en menu_options
+            st.session_state.menu_selection = "Tablero"
             st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
@@ -218,10 +216,15 @@ def dashboard():
         "Cerrar sesión" # Añadimos Cerrar sesión aquí para que esté en el menú
     ]
 
+    # --- CAMBIO IMPORTANTE AQUÍ ---
+    # Asegúrate de que 'menu_selection' esté inicializado y sea una opción válida
+    if "menu_selection" not in st.session_state or st.session_state.menu_selection not in menu_options:
+        st.session_state.menu_selection = menu_options[0] # Siempre usa la primera opción como default
+    # --- FIN DEL CAMBIO ---
+
     st.sidebar.title("Menú Principal") # Título para la barra lateral
 
     # Usar st.radio para el menú en la barra lateral
-    # Guardamos la selección en st.session_state para que persista
     selected_option = st.sidebar.radio(
         "Navegación", # Etiqueta del radio, puede ser vacía "" si no quieres texto
         options=menu_options,
@@ -320,11 +323,14 @@ def dashboard():
         st.write("Valida la calidad y consistencia de tus datos.")
     elif st.session_state.menu_selection == "Cerrar sesión":
         st.session_state.logged_in = False
-        st.session_state.menu_selection = "Inicio" # Resetea la selección del menú al cerrar sesión
+        # Al cerrar sesión, el 'logged_in' se vuelve False, y el flujo va a login()
+        # No necesitamos setear menu_selection a "Inicio" aquí porque al volver a login,
+        # y luego a dashboard (si se loguea de nuevo), la inicialización en dashboard
+        # se encargará de esto.
         st.rerun()
 
 if st.session_state.logged_in:
     dashboard()
 else:
     login()
-                                        
+        
