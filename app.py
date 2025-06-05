@@ -3,6 +3,8 @@ import pandas as pd
 import pydeck as pdk
 import base64
 import re
+import plotly.express as px
+import datetime
 
 USERS = {"admin": "1234"}
 
@@ -122,8 +124,8 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] {{
     flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
     overflow-y: auto; /* Habilita el scroll vertical si el contenido excede el espacio */
-    padding-top: 15px; /* Ajuste para el título */
-    padding-bottom: 15px; /* Espacio al final del menú */
+    padding-top: 10px; /* Ajuste para el título, un poco menos */
+    padding-bottom: 10px; /* Espacio al final del menú, un poco menos */
     padding-left: 0px;
     padding-right: 0px;
 }}
@@ -132,9 +134,9 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 0.75rem; /* Margen inferior reducido para compactar */
-    font-size: 1.6rem; /* Título un poco más pequeño para dejar más espacio */
-    padding: 0 20px;
+    margin-bottom: 0.5rem; /* Margen inferior aún más reducido */
+    font-size: 1.5rem; /* Título un poco más pequeño */
+    padding: 0 15px; /* Padding horizontal ligeramente reducido */
 }}
 
 /* Contenedor del grupo de radio buttons */
@@ -145,10 +147,10 @@ div.stTextInput > div > input::placeholder {{
 
 /* Cada opción del menú (el área clicable) */
 [data-testid="stSidebarContent"] .stRadio label {{
-    font-size: 0.95rem; /* TAMAÑO DE TEXTO LIGERAMENTE MÁS PEQUEÑO para que quepan más */
+    font-size: 0.9rem; /* TAMAÑO DE TEXTO AÚN MÁS PEQUEÑO para maximizar espacio */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7) !important; /* Blanco ligeramente desvanecido */
-    padding: 4px 20px !important; /* REDUCIDO DRÁSTICAMENTE PARA COMPACTAR MÁS */
+    padding: 3px 15px !important; /* REDUCIDO AL MÍNIMO para que quepan todos los elementos */
     margin-bottom: 0px !important;
     border-radius: 0px !important;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -186,7 +188,7 @@ div.stTextInput > div > input::placeholder {{
 [data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
-    gap: 8px; /* Espacio entre el ícono y el texto, un poco reducido */
+    gap: 7px; /* Espacio entre el ícono y el texto, un poco más reducido */
 }}
 
 /* --- ESTILOS PARA CONTROLES DEL MAPA GIS (NO SE TOCAN) --- */
@@ -371,25 +373,54 @@ def dashboard():
 
     # --- Contenido principal basado en la selección del menú ---
     if st.session_state.menu_selection == "Tablero":
-        st.title("Tablero de Control")
-        st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
+        st.title("🏠 Tablero de Control")
+        st.write("Bienvenido al tablero principal de PolarisWEB. Aquí puedes ver un resumen del estado de tu red de monitoreo.")
+
+        st.markdown("---")
+        st.header("Métricas Clave")
+        col_m1, col_m2, col_m3 = st.columns(3)
+        with col_m1:
+            st.metric(label="Estaciones Activas", value="15 / 20", delta="↑ 2 en 24h")
+        with col_m2:
+            st.metric(label="Alarmas Activas", value="3", delta="↑ 1 nueva")
+        with col_m3:
+            st.metric(label="Última Actualización", value=datetime.datetime.now().strftime("%H:%M:%S"), delta="Hace 1 minuto")
+
+        st.markdown("---")
+        st.header("Precipitación Total Últimas 24h")
+        # Datos de ejemplo para el gráfico
+        data_precip = pd.DataFrame({
+            "Hora": pd.to_datetime(pd.date_range(end=datetime.datetime.now(), periods=24, freq='H')),
+            "Precipitación (mm)": [i * 0.5 + (i % 5) for i in range(24)]
+        })
+        fig_precip = px.area(data_precip, x="Hora", y="Precipitación (mm)", title="Acumulado de Precipitación Horaria",
+                             labels={"Precipitación (mm)": "Precipitación (mm)"})
+        st.plotly_chart(fig_precip, use_container_width=True)
+
+
     elif st.session_state.menu_selection == "GIS":
-        st.title("Información Geográfica")
-        st.write("Explora datos GIS relevantes para tus proyectos.")
+        st.title("🌐 Información Geográfica")
+        st.write("Esta sección provee herramientas avanzadas de análisis geográfico y gestión de capas GIS.")
+        st.info("Aquí se podrían cargar y superponer diferentes capas GIS (hidrográficas, geológicas, límites administrativos, etc.) para análisis complejos.")
+        st.subheader("Opciones Avanzadas GIS")
+        st.checkbox("Mostrar capas hidrográficas")
+        st.checkbox("Mostrar zonas de riesgo")
+        st.selectbox("Seleccionar tipo de mapa base", ["Satélite", "Calles", "Topográfico"])
+
+
     elif st.session_state.menu_selection == "Mapa GIS":
-        st.subheader("Mapa GIS")
+        st.subheader("🗺️ Mapa GIS de Estaciones")
 
         # --- CONTROLES DE FILTRO/BÚSQUEDA DEL MAPA GIS ---
         col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 0.8])
 
         with col1:
             st.caption("Buscar estación")
-            # Asumiendo que 'estaciones.csv' existe y tiene una columna 'nombre'
             try:
                 df_stations = pd.read_csv("estaciones.csv")
                 station_names = ["Todas las estaciones"] + list(df_stations["nombre"].unique())
             except FileNotFoundError:
-                st.error("Error: 'estaciones.csv' no encontrado.")
+                st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
                 station_names = ["Todas las estaciones"] # Fallback
             except KeyError:
                 st.error("Error: Columna 'nombre' no encontrada en 'estaciones.csv'.")
@@ -427,7 +458,7 @@ def dashboard():
 
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                df['estado'] = 'indefinido'
+                df['estado'] = 'indefinido' # Default para evitar errores si la columna no existe
 
             if filter_option == "Activas":
                 filtered_df = df[df['estado'] == 'activa']
@@ -439,17 +470,32 @@ def dashboard():
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
-            st.dataframe(filtered_df)
+            # Esto se puede quitar si no se quiere mostrar la tabla de datos del mapa
+            # st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
+            # st.dataframe(filtered_df)
 
             def get_color(row):
-                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                if display_option == "Estado de las estaciones":
+                    return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                elif display_option == "Temperatura":
+                    # Ejemplo: Rojo para caliente, azul para frío
+                    temp = row.get('temperatura', 0) # Asegúrate de tener esta columna en CSV
+                    if temp > 25: return [255, 0, 0, 160] # Rojo
+                    elif temp < 10: return [0, 0, 255, 160] # Azul
+                    else: return [0, 200, 0, 160] # Verde
+                elif display_option == "Precipitación":
+                    # Ejemplo: Azul claro para poca, azul oscuro para mucha
+                    precip = row.get('precipitacion', 0) # Asegúrate de tener esta columna en CSV
+                    if precip > 10: return [0, 0, 150, 160] # Azul oscuro
+                    elif precip > 0: return [0, 150, 255, 160] # Azul claro
+                    else: return [150, 150, 150, 160] # Gris si no hay precipitación
+                return [200, 200, 0, 160] # Default si no se encuentra opción
 
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9',
+                map_style='mapbox://styles/mapbox/light-v9', # Puedes probar otros estilos: dark-v10, satellite-streets-v11
                 initial_view_state=pdk.ViewState(
-                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
-                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
+                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 40.4168, # Default Madrid si no hay datos
+                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else -3.7038, # Default Madrid si no hay datos
                     zoom=5,
                     pitch=50,
                 ),
@@ -459,74 +505,173 @@ def dashboard():
                         data=filtered_df,
                         get_position='[lon, lat]',
                         get_color=get_color,
-                        get_radius=2500,
+                        get_radius=2500, # Tamaño de los puntos
+                        pickable=True, # Hace los puntos clickeables
+                        auto_highlight=True,
                     ),
                 ],
             ))
 
+            st.write("Haz clic en los puntos del mapa para más detalles (funcionalidad de tooltip se implementaría con más complejidad en PyDeck).")
+
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
+            st.warning("Para el 'Mapa GIS', crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
+            st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
+
         except KeyError as e:
             st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
+            st.warning("Para el 'Mapa GIS', crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
+            st.dataframe(pd.DataFrame({'nombre': ['Estación Demo 1'], 'lat': [40.4168], 'lon': [-3.7038], 'estado': ['activa'], 'temperatura': [20], 'precipitacion': [5]}))
 
 
     elif st.session_state.menu_selection == "Visor":
-        st.title("Visor de Datos")
-        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo.")
+        st.title("📊 Visor de Datos")
+        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo de tus estaciones.")
+
+        st.subheader("Selección de Datos")
+        col_v1, col_v2 = st.columns(2)
+        with col_v1:
+            try:
+                df_stations_viewer = pd.read_csv("estaciones.csv")
+                station_options = list(df_stations_viewer["nombre"].unique())
+            except FileNotFoundError:
+                station_options = ["Estación Demo"]
+                st.warning("Para el 'Visor', crea un archivo `estaciones.csv` con una columna `nombre`.")
+
+            selected_station = st.selectbox("Selecciona Estación", station_options)
+        with col_v2:
+            # Asumiendo que tenemos variables comunes para mostrar
+            variable_options = ["Temperatura", "Precipitación", "Humedad", "Nivel de Agua"]
+            selected_variable = st.selectbox("Selecciona Variable", variable_options)
+
+        st.subheader(f"Gráfico de {selected_variable} para {selected_station}")
+
+        # Datos de ejemplo para el visor
+        time_data = pd.DataFrame({
+            "Fecha/Hora": pd.to_datetime(pd.date_range(end=datetime.datetime.now(), periods=100, freq='H')),
+            selected_variable: [i + (i % 10) * 0.5 for i in range(100)]
+        })
+        fig_viewer = px.line(time_data, x="Fecha/Hora", y=selected_variable,
+                             title=f"Serie de Tiempo de {selected_variable}")
+        st.plotly_chart(fig_viewer, use_container_width=True)
+
+
     elif st.session_state.menu_selection == "Fast Viewer":
-        st.title("Visor Rápido")
-        st.write("Visualización rápida de datos en tiempo real.")
+        st.title("⚡ Fast Viewer")
+        st.write("Visualización rápida de datos en tiempo real (modo simplificado).")
+        st.info("Esta sección podría mostrar los datos más recientes de las estaciones críticas sin configuraciones adicionales.")
+        st.text_area("Datos en tiempo real (simulado)", "Estación A: Temp 22.5°C, Precip 0.0mm\nEstación B: Nivel 1.2m, Hum 78%\n...", height=200)
+
+
     elif st.session_state.menu_selection == "Estaciones":
-        st.title("Gestión de Estaciones")
-        st.write("Administra y consulta información de tus estaciones de monitoreo.")
+        st.title("📡 Gestión de Estaciones")
+        st.write("Administra y consulta información detallada de todas tus estaciones de monitoreo.")
+
+        st.subheader("Listado de Estaciones")
+        try:
+            df_all_stations = pd.read_csv("estaciones.csv")
+            # Añadir una columna de "Última Conexión" si no existe
+            if 'ultima_conexion' not in df_all_stations.columns:
+                df_all_stations['ultima_conexion'] = [
+                    (datetime.datetime.now() - datetime.timedelta(minutes=i*10)).strftime("%Y-%m-%d %H:%M:%S")
+                    for i in range(len(df_all_stations))
+                ]
+            st.dataframe(df_all_stations, use_container_width=True)
+        except FileNotFoundError:
+            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
+            st.warning("Crea un archivo `estaciones.csv` con columnas: `nombre, lat, lon, estado, temperatura, precipitacion`.")
+            st.dataframe(pd.DataFrame({'nombre': ['Estación A', 'Estación B'], 'lat': [41.3, 42.0], 'lon': [2.1, 1.5], 'estado': ['activa', 'inactiva'], 'temperatura': [20, 15], 'precipitacion': [5, 0], 'ultima_conexion': [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), (datetime.datetime.now() - datetime.timedelta(hours=5)).strftime("%Y-%m-%d %H:%M:%S")]}))
+        except KeyError as e:
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas requeridas.")
+
+
     elif st.session_state.menu_selection == "Monitoring":
-        st.title("Monitoreo en Tiempo Real")
-        st.write("Sigue los parámetros clave en tiempo real.")
+        st.title("📈 Monitoreo en Tiempo Real")
+        st.write("Aquí puedes supervisar los parámetros clave de las estaciones en vivo.")
+        st.info("Implementar un panel de monitoreo con actualizaciones automáticas (requeriría backend o mecanismos de refresh).")
+
+
     elif st.session_state.menu_selection == "Informe personalizado":
-        st.title("Informes Personalizados")
-        st.write("Genera informes a medida según tus necesidades.")
+        st.title("📄 Informes Personalizados")
+        st.write("Genera informes a medida con los datos seleccionados y en el formato deseado.")
+        st.info("Secciones para selección de fechas, estaciones, variables, formatos de exportación (PDF, CSV).")
+
+
     elif st.session_state.menu_selection == "Informe rosa de los vientos":
-        st.title("Informe Rosa de los Vientos")
-        st.write("Visualiza patrones de dirección y velocidad del viento.")
+        st.title("💨 Informe Rosa de los Vientos")
+        st.write("Visualiza patrones de dirección y velocidad del viento para estaciones seleccionadas.")
+        st.info("Gráficos de rosa de los vientos para análisis meteorológicos.")
+
+
     elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title("Análisis de Lluvias Consecutivas")
-        st.write("Herramientas para analizar eventos de lluvia prolongados.")
+        st.title("🌧️ Análisis de Lluvias Consecutivas")
+        st.write("Herramientas para analizar eventos de lluvia prolongados y sus impactos.")
+        st.info("Cálculo de acumulados, intensidad y duración de eventos de lluvia.")
+
+
     elif st.session_state.menu_selection == "Vistas":
-        st.title("Vistas Predefinidas")
-        st.write("Carga y guarda configuraciones de visualización de datos.")
+        st.title("👁️ Vistas Predefinidas")
+        st.write("Carga y guarda configuraciones de visualización de datos y paneles.")
+        st.info("Permite a los usuarios guardar y acceder rápidamente a sus configuraciones de gráficos y tablas.")
+
+
     elif st.session_state.menu_selection == "Sinóptico":
-        st.title("Diseñador de Sinópticos")
-        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
+        st.title("🗺️ Diseñador de Sinópticos")
+        st.write("Crea o edita diagramas sinópticos interactivos de tus sistemas.")
+        st.info("Herramienta para diseñar representaciones visuales de la red con datos en vivo.")
+
+
     elif st.session_state.menu_selection == "Sinópticos":
-        st.title("Sinópticos Existentes")
-        st.write("Lista de tus diagramas sinópticos.")
+        st.title("🗺️ Sinópticos Existentes")
+        st.write("Lista y accede a tus diagramas sinópticos configurados.")
+        st.info("Panel de control para ver y lanzar los sinópticos creados.")
+
+
     elif st.session_state.menu_selection == "Custom Synoptics":
-        st.title("Sinópticos Personalizados")
-        st.write("Gestiona tus sinópticos adaptados.")
+        st.title("⚙️ Sinópticos Personalizados")
+        st.write("Gestiona tus sinópticos adaptados y específicos para tus necesidades.")
+        st.info("Funcionalidad para sinópticos con configuraciones avanzadas o específicas de usuario.")
+
+
     elif st.session_state.menu_selection == "Supervisor":
-        st.title("Panel de Supervisor")
-        st.write("Herramientas para la supervisión y gestión de usuarios.")
+        st.title("🧑‍💻 Panel de Supervisor")
+        st.write("Herramientas para la supervisión y gestión de usuarios y permisos del sistema.")
+        st.info("Control de acceso, roles de usuario y auditoría.")
+
+
     elif st.session_state.menu_selection == "Estadísticas de red":
-        st.title("Estadísticas de la Red")
-        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
+        st.title("📊 Estadísticas de la Red")
+        st.write("Consulta el rendimiento y estado general de tu red de monitoreo.")
+        st.info("Métricas de uptime, latencia, volumen de datos, etc.")
+
+
     elif st.session_state.menu_selection == "Registros":
-        st.title("Historial de Registros")
-        st.write("Accede a los logs y registros de actividad del sistema.")
+        st.title("📜 Historial de Registros")
+        st.write("Accede a los logs y registros de actividad detallados del sistema.")
+        st.info("Filtrado y búsqueda de logs para diagnóstico de problemas.")
+
+
     elif st.session_state.menu_selection == "Módulos":
-        st.title("Administración de Módulos")
-        st.write("Activa y desactiva módulos de la aplicación.")
+        st.title("📦 Administración de Módulos")
+        st.write("Activa y desactiva módulos de la aplicación para personalizar la experiencia.")
+        st.info("Interfaz para gestionar extensiones y funcionalidades adicionales.")
+
+
     elif st.session_state.menu_selection == "Túnel":
-        st.title("Configuración de Túnel")
-        st.write("Gestiona conexiones y túneles de comunicación.")
+        st.title("🔗 Configuración de Túnel")
+        st.write("Gestiona conexiones y túneles de comunicación seguros a tus dispositivos.")
+        st.info("Herramientas para configurar conexiones VPN o túneles SSH/TCP.")
+
+
     elif st.session_state.menu_selection == "Validador":
-        st.title("Herramienta de Validación")
-        st.write("Valida la calidad y consistencia de tus datos.")
+        st.title("✅ Herramienta de Validación")
+        st.write("Valida la calidad y consistencia de tus datos de monitoreo.")
+        st.info("Reglas de validación, detección de outliers y corrección de datos.")
+
+
     elif st.session_state.menu_selection == "Cerrar sesión":
         st.session_state.logged_in = False
         st.rerun()
 
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
-    
+if st.session_state.log
