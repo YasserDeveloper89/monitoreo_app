@@ -1,4 +1,6 @@
-nombre,lat,lon,temperatura,precipitacion,estado
-Estacion A,19.4326,-99.1332,22,5,inactiva
-Estacion B,20.6597,-103.3496,24,10,activa
-Estacion C,21.1619,-86.8515,30,15,activa
+nombre,lat,lon,estado,temperatura,precipitacion,humedad,ubicacion_fisica
+Estación Central,41.3851,2.1734,activa,25.5,1.2,60.1,Barcelona
+Estación Montaña,41.4500,2.1000,activa,18.9,0.0,85.3,Parque Collserola
+Estación Río,41.4000,2.2000,inactiva,22.1,5.5,70.5,Delta del Llobregat
+Estación Costa,41.3500,2.2500,activa,27.0,0.0,75.0,Playa de la Barceloneta
+Estación Norte,41.5000,2.0500,activa,20.0,0.8,80.0,Cerca de Sabadell
