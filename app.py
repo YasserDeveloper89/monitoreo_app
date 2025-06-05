@@ -3,12 +3,10 @@ import pandas as pd
 import pydeck as pdk
 import base64
 
-# Simulación de usuarios
 USERS = {"admin": "1234"}
 
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
-# Función para convertir imagen a base64
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -16,32 +14,86 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file("fondo.jpg")
 
-# CSS para diseño visual moderno con imagen base64 embebida
 st.markdown(f"""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    body, html {{
+        margin: 0; padding: 0; height: 100%;
+        font-family: 'Roboto', sans-serif;
+    }}
+
     .login-container {{
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 90vh;
+        height: 100vh;
         background-image: url("data:image/jpg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
     }}
+
     .login-box {{
-        background-color: rgba(255, 255, 255, 0.92);
-        padding: 3rem 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+        padding: 3rem 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         text-align: center;
         width: 100%;
         max-width: 400px;
+        color: #ffffff;
     }}
+
     .login-box h1 {{
-        color: #1E90FF;
-        font-size: 2rem;
-        margin-bottom: 1rem;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: #1E90FF; /* Azul brillante */
+        letter-spacing: 1.2px;
+    }}
+
+    /* Inputs personalizados */
+    .login-box input[type="text"],
+    .login-box input[type="password"] {{
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: box-shadow 0.3s ease;
+    }}
+
+    .login-box input[type="text"]:focus,
+    .login-box input[type="password"]:focus {{
+        box-shadow: 0 0 8px 2px #1E90FF;
+    }}
+
+    /* Botón moderno */
+    .login-box button {{
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #1E90FF;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }}
+
+    .login-box button:hover {{
+        background-color: #1c7ed6;
+    }}
+
+    /* Mensajes */
+    .stSuccess, .stError {{
+        margin-top: 1rem;
+        font-weight: 600;
+        font-size: 1rem;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -49,20 +101,19 @@ st.markdown(f"""
 def login():
     st.markdown('<div class="login-container"><div class="login-box">', unsafe_allow_html=True)
     st.markdown('<h1>Polaris Web</h1>', unsafe_allow_html=True)
-    user = st.text_input("Usuario")
-    pwd = st.text_input("Contraseña", type="password")
+
+    user = st.text_input("", placeholder="Usuario")
+    pwd = st.text_input("", placeholder="Contraseña", type="password")
     login_btn = st.button("Iniciar sesión")
-    
+
     if login_btn:
         if USERS.get(user) == pwd:
             st.session_state.logged_in = True
             st.success("Sesión iniciada correctamente.")
         else:
             st.error("Usuario o contraseña incorrectos.")
-    
     st.markdown('</div></div>', unsafe_allow_html=True)
 
-    # Recarga la app solo si el usuario ya está logueado para evitar loops
     if st.session_state.get("logged_in", False):
         st.experimental_rerun()
 
