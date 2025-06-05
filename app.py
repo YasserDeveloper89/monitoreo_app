@@ -27,7 +27,7 @@ except FileNotFoundError:
 
 st.markdown(f"""
 <style>
-/* Base container for the app view */
+/* Base container for the app view (Login Page - Revert to previous working state) */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -36,20 +36,18 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
-    /* Añadimos flexbox para controlar la alineación vertical */
-    display: flex;
+    display: flex; /* Flexbox para centrar contenido en la página de login */
     flex-direction: column;
-    /* Esto es clave: alinea los ítems al inicio del contenedor (arriba) */
-    justify-content: flex-start;
-    align-items: center; /* Centra horizontalmente el contenido */
-    padding-top: 0; /* Asegurarse de que no haya padding superior en el contenedor principal */
+    justify-content: center; /* Centra verticalmente */
+    align-items: center; /* Centra horizontalmente */
+    padding-top: 0;
 }}
 
 /* Logo container styles */
 .logo-container {{
     text-align: center;
-    margin-top: 0.5rem; /* Reducido al mínimo */
-    margin-bottom: 1rem; /* Ajustar según sea necesario */
+    margin-top: 0; /* Eliminar margen superior adicional para el logo en la página de login */
+    margin-bottom: 2rem; /* Ajustar según sea necesario para separar del input */
 }}
 
 .logo-container img {{
@@ -63,8 +61,8 @@ st.markdown(f"""
 h1 {{
     color: white;
     text-align: center;
-    margin-top: 0.5rem; /* Reducido al mínimo */
-    margin-bottom: 1rem; /* Ajustar según sea necesario */
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }}
 
 /* Button styles */
@@ -111,39 +109,37 @@ div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* --- REVISED AND MORE AGGRESSIVE STYLES FOR THE SIDEBAR MENU --- */
+/* --- SIDEBAR MENU STYLES (MATCHING EXAMPLE IMAGE) --- */
 
 /* Overall sidebar background and spacing */
 [data-testid="stSidebar"] {{
     background-color: #1A2437; /* Dark background */
     color: white;
-    padding-top: 0px; /* Ajustar padding para dejar espacio para el título dentro del contenido */
+    padding-top: 0px;
     padding-left: 0px;
     padding-right: 0px;
-    height: 100vh; /* Aseguramos que ocupe toda la altura de la ventana */
-    display: flex; /* Usamos flexbox para gestionar el contenido interno */
-    flex-direction: column; /* Contenido apilado verticalmente */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }}
 
-/* Nuevo y crítico: Contenedor del contenido del sidebar */
-/* Este es el que suele tener el scroll real si el contenido es largo */
+/* Content area within sidebar (where menu items and title are) */
 [data-testid="stSidebarContent"] {{
-    flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
-    overflow-y: auto; /* Habilitamos el scroll vertical si el contenido excede el espacio */
-    padding-top: 20px; /* Añadimos padding superior aquí para el título */
-    padding-bottom: 20px; /* Espacio para que la última opción no se pegue al borde */
-    /* Añadimos padding horizontal para el contenido */
+    flex: 1; /* Allows it to grow and occupy available space */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    padding-top: 20px; /* Padding for the title inside */
+    padding-bottom: 20px; /* Padding at the bottom */
     padding-left: 0px;
     padding-right: 0px;
 }}
 
 /* Title in the sidebar */
-[data-testid="stSidebarContent"] h1 {{ /* Target the H1 inside the scrollable content */
+[data-testid="stSidebarContent"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-size: 1.8rem;
-    padding: 0 20px; /* Apply horizontal padding here for the title */
+    padding: 0 20px; /* Horizontal padding for the title */
 }}
 
 /* Ensure the radio group container fills the width */
@@ -152,24 +148,19 @@ div.stTextInput > div > input::placeholder {{
     padding: 0;
 }}
 
-/* Each radio option label (the clickable area) */
+/* Each radio option label (the clickable area) - Adjusted for compact look */
 [data-testid="stSidebarContent"] .stRadio label {{
     font-size: 1rem; /* Consistent font size */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
-    padding: 8px 20px !important; /* REDUCED VERTICAL PADDING: de 12px a 8px */
+    padding: 10px 20px !important; /* REDUCED PADDING for more compact look */
     margin-bottom: 0px !important; /* Remove space between items */
-    border-radius: 0px !important; /* Sharp corners like the example */
+    border-radius: 0px !important; /* Sharp corners */
     transition: background-color 0.2s ease, color 0.2s ease;
-    display: flex !important; /* Use flexbox for icon/text alignment */
+    display: flex !important;
     align-items: center !important;
-    width: 100% !important; /* Ensure it takes full width */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle line separator */
-}}
-
-/* Remove border from the last menu item to avoid an extra line at the bottom */
-[data-testid="stSidebarContent"] .stRadio label:last-child {{
-    border-bottom: none !important;
+    width: 100% !important;
+    border-bottom: none !important; /* ELIMINAR LÍNEAS DE SEPARACIÓN */
 }}
 
 /* Hover state for menu options */
@@ -186,20 +177,19 @@ div.stTextInput > div > input::placeholder {{
     font-weight: 600 !important; /* Slightly bolder */
 }}
 
-/* This is the key to remove the native radio bullet point/circle */
-/* Target the div that contains the actual radio input element */
+/* Hide the native radio bullet point/circle */
 [data-testid="stSidebarContent"] .stRadio label > div:first-child {{
     display: none !important;
 }}
 
-/* If using markdown in label (for emojis/icons), ensure it's aligned */
+/* Ensure markdown content (icons/text) is aligned */
 [data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
     gap: 10px; /* Space between icon and text */
 }}
 
-/* --- NEW / UPDATED STYLES FOR GIS MAP CONTROLS --- */
+/* --- GIS MAP CONTROLS (UNCHANGED) --- */
 
 /* Style for selectbox labels */
 div.stSelectbox > label {{
@@ -207,12 +197,12 @@ div.stSelectbox > label {{
     font-size: 1rem;
     margin-bottom: 0.5rem;
     display: block;
-    color: white; /* White label text */
+    color: white;
 }}
 
 /* Style for selectbox dropdown input area */
 .stSelectbox [data-testid="stSelectboxProcessedOptions"] {{
-    background-color: rgba(255, 255, 255, 0.15) !important; /* Semi-transparent dark background */
+    background-color: rgba(255, 255, 255, 0.15) !important;
     border-radius: 8px !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: white !important;
@@ -222,39 +212,39 @@ div.stSelectbox > label {{
 
 /* Style for selectbox options in dropdown */
 .stSelectbox ul {{
-    background-color: #2D3E5E !important; /* Darker background for dropdown options */
+    background-color: #2D3E5E !important;
     color: white !important;
     border-radius: 8px;
 }}
 
 .stSelectbox li:hover {{
-    background-color: #1A2437 !important; /* Slightly darker on hover */
+    background-color: #1A2437 !important;
     color: white !important;
 }}
 
 .stSelectbox li[aria-selected="true"] {{
-    background-color: #1E90FF !important; /* Blue for selected option */
+    background-color: #1E90FF !important;
     color: white !important;
 }}
 
 /* Style for the button with the filter icon */
 .stButton[data-testid="baseButton-secondary"] > button {{
-    background-color: #1E90FF !important; /* Blue background */
+    background-color: #1E90FF !important;
     color: white !important;
     font-weight: 700;
     font-size: 1.2rem;
-    padding: 0.75rem 1rem !important; /* Adjusted padding */
+    padding: 0.75rem 1rem !important;
     border-radius: 10px !important;
     border: none !important;
-    width: auto !important; /* Auto width for the icon button */
-    min-width: 50px; /* Minimum width for the button */
+    width: auto !important;
+    min-width: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 38px; /* Match height of selectbox for alignment */
-    margin-top: 1.5rem; /* Align with selectboxes above */
+    height: 38px;
+    margin-top: 1.5rem;
 }}
 
 .stButton[data-testid="baseButton-secondary"] > button:hover {{
@@ -266,80 +256,19 @@ div.stSelectbox > label {{
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
 }}
-.st-emotion-cache-1c7y2vl {{ /* This targets the columns internal padding */
+.st-emotion-cache-1c7y2vl {{
     padding-bottom: 0px !important;
 }}
 
 /* Specific adjustments for the PyDeck map container itself */
 .stDeckGlJsonChart {{
-    border-radius: 10px; /* Rounded corners for the map */
-    overflow: hidden; /* Ensures corners are respected */
-    margin-top: 1rem; /* Space between controls and map */
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 1rem;
 }}
 
 </style>
 """, unsafe_allow_html=True)
-    # JavaScript para cerrar el sidebar automáticamente al hacer clic en una opción
-st.components.v1.html("""
-<script>
-    function setupSidebarAutoClose() {
-        // Selecciona todos los elementos de las opciones del menú dentro del sidebar
-        const menuItems = document.querySelectorAll('[data-testid="stSidebarContent"] .stRadio label');
-        // Selecciona el contenedor principal de la aplicación, que cuando se hace clic, suele cerrar el sidebar
-        const mainAppContainer = document.querySelector('[data-testid="stAppViewContainer"]');
-
-        if (!mainAppContainer) {
-            // console.warn("Main app container not found for sidebar auto-close.");
-            return;
-        }
-
-        menuItems.forEach(item => {
-            // Evita adjuntar el evento más de una vez si el DOM se re-renderiza
-            // Esto es una solución simple, para una robustez mayor se podría usar removeEventListener
-            if (!item.hasAttribute('data-sidebar-close-listener')) {
-                item.addEventListener('click', () => {
-                    // Retrasa la simulación del clic ligeramente para permitir que Streamlit procese la selección del menú primero
-                    setTimeout(() => {
-                        // Simula un clic en el contenedor principal de la aplicación para cerrar el sidebar
-                        // Esta es una forma común de cerrar el sidebar móvil de Streamlit
-                        if (mainAppContainer) {
-                            mainAppContainer.click();
-                            // console.log("Simulated click on main app container to close sidebar.");
-                        }
-                    }, 100); // Pequeño retraso de 100ms
-                });
-                item.setAttribute('data-sidebar-close-listener', 'true'); // Marca que el listener ha sido añadido
-            }
-        });
-
-        // console.log("Sidebar auto-close script loaded and listeners attached.");
-    }
-
-    // Ejecuta la función de configuración después de que el documento esté listo
-    document.addEventListener('DOMContentLoaded', setupSidebarAutoClose);
-
-    // Usa un MutationObserver para re-ejecutar la configuración si el DOM de Streamlit cambia
-    // Esto es importante porque Streamlit re-renderiza partes de la página dinámicamente
-    const observer = new MutationObserver((mutationsList, observer) => {
-        for(let mutation of mutationsList) {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                // Una forma simple de verificar si se han añadido nodos relevantes,
-                // podría hacerse más específico buscando data-testid="stSidebar"
-                setupSidebarAutoClose();
-                // console.log("DOM mutation detected, re-running sidebar auto-close setup.");
-                break; // Solo necesitamos correr una vez por lote de mutación
-            }
-        }
-    });
-
-    // Comienza a observar el body en busca de cambios en la lista de hijos (childList)
-    // y en todo el subárbol (subtree) para capturar la aparición/desaparición del sidebar
-    observer.observe(document.body, { childList: true, subtree: true });
-
-</script>
-""", height=0, width=0) # Altura y ancho 0 porque solo inyecta un script
-
-
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -600,4 +529,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-    
+        
