@@ -3,12 +3,10 @@ import pandas as pd
 import pydeck as pdk
 import base64
 
-# Usuarios para login
 USERS = {"admin": "1234"}
 
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
-# Carga imagen y la convierte a base64 para usar en CSS
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -16,7 +14,6 @@ def get_base64_of_bin_file(bin_file):
 
 img_base64 = get_base64_of_bin_file("fondo.jpg")
 
-# Estilos CSS para fondo y cuadro de login
 st.markdown(f"""
 <style>
 /* Fondo de toda la página */
@@ -37,7 +34,7 @@ st.markdown(f"""
     box-shadow: 0 0 20px rgba(0,0,0,0.6);
     color: white;
     max-width: 400px;
-    margin: 0 auto;
+    margin: 5vh auto; /* espacio arriba y abajo */
     text-align: center;
 }}
 
@@ -48,11 +45,16 @@ st.markdown(f"""
     margin-bottom: 2rem;
 }}
 
-/* Inputs */
+/* Labels visibles y con estilo */
 div.stTextInput > label {{
-    display: none;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    display: block;
+    color: white;
 }}
 
+/* Inputs estilizados */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -65,11 +67,12 @@ div.stTextInput > div > input {{
     transition: box-shadow 0.3s ease !important;
 }}
 
+/* Focus en inputs */
 div.stTextInput > div > input:focus {{
     box-shadow: 0 0 8px 2px #1E90FF !important;
 }}
 
-/* Botón */
+/* Botón estilizado con texto "Login" */
 div.stButton > button {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -90,18 +93,14 @@ div.stButton > button:hover {{
 """, unsafe_allow_html=True)
 
 def login():
-    # Centramos verticalmente usando columnas vacías a izquierda y derecha
     col1, col2, col3 = st.columns([1, 2, 1])
-
     with col2:
-        # Usamos un contenedor con clase login-box para el cuadro oscuro
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
-
         st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
 
-        usuario = st.text_input("Usuario", key="user")
+        usuario = st.text_input("Nombre de usuario", key="user")
         contrasena = st.text_input("Contraseña", type="password", key="pwd")
-        boton = st.button("Iniciar sesión")
+        boton = st.button("Login")
 
         if boton:
             if USERS.get(usuario) == contrasena:
