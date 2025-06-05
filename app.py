@@ -27,7 +27,7 @@ except FileNotFoundError:
 
 st.markdown(f"""
 <style>
-/* Base container for the app view (Login Page - Revert to previous working state) */
+/* Base container for the app view - Se mantiene como está, no se toca */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -36,18 +36,13 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
-    display: flex; /* Flexbox para centrar contenido en la página de login */
-    flex-direction: column;
-    justify-content: center; /* Centra verticalmente */
-    align-items: center; /* Centra horizontalmente */
-    padding-top: 0;
 }}
 
-/* Logo container styles */
+/* Logo container styles - Se mantiene como está, no se toca */
 .logo-container {{
     text-align: center;
-    margin-top: 0; /* Eliminar margen superior adicional para el logo en la página de login */
-    margin-bottom: 2rem; /* Ajustar según sea necesario para separar del input */
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }}
 
 .logo-container img {{
@@ -57,7 +52,7 @@ st.markdown(f"""
     margin: 0 auto;
 }}
 
-/* General H1 styles */
+/* General H1 styles - Se mantiene como está, no se toca */
 h1 {{
     color: white;
     text-align: center;
@@ -65,7 +60,7 @@ h1 {{
     margin-bottom: 1rem;
 }}
 
-/* Button styles */
+/* Button styles - Se mantiene como está, no se toca */
 .stButton > button {{
     background-color: #1E90FF;
     color: white;
@@ -83,7 +78,7 @@ h1 {{
     background-color: #1c7ed6;
 }}
 
-/* Text input label styles */
+/* Text input label styles - Se mantiene como está, no se toca */
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
@@ -92,7 +87,7 @@ div.stTextInput > label {{
     color: white;
 }}
 
-/* Text input field styles */
+/* Text input field styles - Se mantiene como está, no se toca */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -109,87 +104,92 @@ div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* --- SIDEBAR MENU STYLES (MATCHING EXAMPLE IMAGE) --- */
+/* --- ESTILOS DEL MENÚ LATERAL (SIDEBAR) --- */
 
 /* Overall sidebar background and spacing */
 [data-testid="stSidebar"] {{
-    background-color: #1A2437; /* Dark background */
+    background-color: #1A2437; /* Fondo oscuro */
     color: white;
     padding-top: 0px;
     padding-left: 0px;
     padding-right: 0px;
-    height: 100vh;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
     display: flex;
     flex-direction: column;
 }}
 
-/* Content area within sidebar (where menu items and title are) */
+/* Contenedor del contenido del sidebar - CRÍTICO para el scroll y espacio */
 [data-testid="stSidebarContent"] {{
-    flex: 1; /* Allows it to grow and occupy available space */
-    overflow-y: auto; /* Enable vertical scrolling if content overflows */
-    padding-top: 20px; /* Padding for the title inside */
-    padding-bottom: 20px; /* Padding at the bottom */
+    flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
+    overflow-y: auto; /* Habilita el scroll vertical si el contenido excede el espacio */
+    padding-top: 15px; /* Ajuste para el título */
+    padding-bottom: 15px; /* Espacio al final del menú */
     padding-left: 0px;
     padding-right: 0px;
 }}
 
-/* Title in the sidebar */
+/* Título en el sidebar */
 [data-testid="stSidebarContent"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 1rem;
-    font-size: 1.8rem;
-    padding: 0 20px; /* Horizontal padding for the title */
+    margin-bottom: 0.75rem; /* Margen inferior reducido para compactar */
+    font-size: 1.6rem; /* Título un poco más pequeño para dejar más espacio */
+    padding: 0 20px;
 }}
 
-/* Ensure the radio group container fills the width */
+/* Contenedor del grupo de radio buttons */
 [data-testid="stSidebarContent"] .stRadio div[role="radiogroup"] {{
     width: 100%;
     padding: 0;
 }}
 
-/* Each radio option label (the clickable area) - Adjusted for compact look */
+/* Cada opción del menú (el área clicable) */
 [data-testid="stSidebarContent"] .stRadio label {{
-    font-size: 1rem; /* Consistent font size */
+    font-size: 0.95rem; /* TAMAÑO DE TEXTO LIGERAMENTE MÁS PEQUEÑO para que quepan más */
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
-    padding: 10px 20px !important; /* REDUCED PADDING for more compact look */
-    margin-bottom: 0px !important; /* Remove space between items */
-    border-radius: 0px !important; /* Sharp corners */
+    color: rgba(255, 255, 255, 0.7) !important; /* Blanco ligeramente desvanecido */
+    padding: 4px 20px !important; /* REDUCIDO DRÁSTICAMENTE PARA COMPACTAR MÁS */
+    margin-bottom: 0px !important;
+    border-radius: 0px !important;
     transition: background-color 0.2s ease, color 0.2s ease;
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
-    border-bottom: none !important; /* ELIMINAR LÍNEAS DE SEPARACIÓN */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea sutil */
 }}
 
-/* Hover state for menu options */
+/* Eliminar la línea del último elemento del menú */
+[data-testid="stSidebarContent"] .stRadio label:last-child {{
+    border-bottom: none !important;
+}}
+
+/* Estado hover (cuando el ratón está encima) */
 [data-testid="stSidebarContent"] .stRadio label:hover {{
-    background-color: #2D3E5E !important; /* Lighter background on hover */
-    color: white !important; /* Pure white text on hover */
+    background-color: #2D3E5E !important; /* Fondo más claro en hover */
+    color: white !important; /* Texto blanco puro en hover */
     cursor: pointer !important;
 }}
 
-/* Selected (active) state for menu options */
+/* Estado seleccionado (activo) */
 [data-testid="stSidebarContent"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
-    background-color: #0E1629 !important; /* Darker background for selected item */
-    color: white !important; /* Pure white text for selected item */
-    font-weight: 600 !important; /* Slightly bolder */
+    background-color: #0E1629 !important; /* Fondo más oscuro para el elemento seleccionado */
+    color: white !important; /* Texto blanco puro para el elemento seleccionado */
+    font-weight: 600 !important; /* Ligeramente más negrita */
 }}
 
-/* Hide the native radio bullet point/circle */
+/* Ocultar el círculo nativo del radio button */
 [data-testid="stSidebarContent"] .stRadio label > div:first-child {{
     display: none !important;
 }}
 
-/* Ensure markdown content (icons/text) is aligned */
+/* Alineación de íconos/emojis con el texto */
 [data-testid="stSidebarContent"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between icon and text */
+    gap: 8px; /* Espacio entre el ícono y el texto, un poco reducido */
 }}
 
-/* --- GIS MAP CONTROLS (UNCHANGED) --- */
+/* --- ESTILOS PARA CONTROLES DEL MAPA GIS (NO SE TOCAN) --- */
 
 /* Style for selectbox labels */
 div.stSelectbox > label {{
@@ -197,12 +197,12 @@ div.stSelectbox > label {{
     font-size: 1rem;
     margin-bottom: 0.5rem;
     display: block;
-    color: white;
+    color: white; /* White label text */
 }}
 
 /* Style for selectbox dropdown input area */
 .stSelectbox [data-testid="stSelectboxProcessedOptions"] {{
-    background-color: rgba(255, 255, 255, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.15) !important; /* Semi-transparent dark background */
     border-radius: 8px !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: white !important;
@@ -212,39 +212,39 @@ div.stSelectbox > label {{
 
 /* Style for selectbox options in dropdown */
 .stSelectbox ul {{
-    background-color: #2D3E5E !important;
+    background-color: #2D3E5E !important; /* Darker background for dropdown options */
     color: white !important;
     border-radius: 8px;
 }}
 
 .stSelectbox li:hover {{
-    background-color: #1A2437 !important;
+    background-color: #1A2437 !important; /* Slightly darker on hover */
     color: white !important;
 }}
 
 .stSelectbox li[aria-selected="true"] {{
-    background-color: #1E90FF !important;
+    background-color: #1E90FF !important; /* Blue for selected option */
     color: white !important;
 }}
 
 /* Style for the button with the filter icon */
 .stButton[data-testid="baseButton-secondary"] > button {{
-    background-color: #1E90FF !important;
+    background-color: #1E90FF !important; /* Blue background */
     color: white !important;
     font-weight: 700;
     font-size: 1.2rem;
-    padding: 0.75rem 1rem !important;
+    padding: 0.75rem 1rem !important; /* Adjusted padding */
     border-radius: 10px !important;
     border: none !important;
-    width: auto !important;
-    min-width: 50px;
+    width: auto !important; /* Auto width for the icon button */
+    min-width: 50px; /* Minimum width for the button */
     cursor: pointer;
     transition: background-color 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 38px;
-    margin-top: 1.5rem;
+    height: 38px; /* Match height of selectbox for alignment */
+    margin-top: 1.5rem; /* Align with selectboxes above */
 }}
 
 .stButton[data-testid="baseButton-secondary"] > button:hover {{
@@ -256,15 +256,15 @@ div.stSelectbox > label {{
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
 }}
-.st-emotion-cache-1c7y2vl {{
+.st-emotion-cache-1c7y2vl {{ /* This targets the columns internal padding */
     padding-bottom: 0px !important;
 }}
 
 /* Specific adjustments for the PyDeck map container itself */
 .stDeckGlJsonChart {{
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 1rem;
+    border-radius: 10px; /* Rounded corners for the map */
+    overflow: hidden; /* Ensures corners are respected */
+    margin-top: 1rem; /* Space between controls and map */
 }}
 
 </style>
@@ -529,4 +529,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-        
+    
