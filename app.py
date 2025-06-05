@@ -4,7 +4,7 @@ import pydeck as pdk
 import base64
 import re
 
-USERS = {"admin": "1234"}
+USERS = {"admin": "1234567890"}
 
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
