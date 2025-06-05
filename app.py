@@ -1,19 +1,3 @@
-import streamlit as st
-import pandas as pd
-import pydeck as pdk
-import base64
-
-USERS = {"admin": "1234"}
-
-st.set_page_config(page_title="Polaris Web", layout="centered")
-
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
-img_base64 = get_base64_of_bin_file("fondo.jpg")
-
 st.markdown(f"""
 <style>
 /* Fondo con imagen */
@@ -42,7 +26,7 @@ st.markdown(f"""
     border: 1px solid rgba(255, 255, 255, 0.18);
     color: white;
     text-align: center;
-} 
+}} 
 
 .login-form h1 {{
     font-weight: 700;
@@ -106,65 +90,3 @@ div.stButton > button:hover {{
 }}
 </style>
 """, unsafe_allow_html=True)
-
-def login():
-    st.markdown('<div class="login-form">', unsafe_allow_html=True)
-    st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
-
-    with st.form(key="login_form"):
-        usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
-        contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
-        submit_btn = st.form_submit_button("Login")
-
-        if submit_btn:
-            if USERS.get(usuario) == contrasena:
-                st.session_state.logged_in = True
-                st.experimental_rerun()
-            else:
-                st.error("Usuario o contraseña incorrectos.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-def dashboard():
-    st.sidebar.title("Menú")
-    opcion = st.sidebar.radio("Ir a", ["Inicio", "Mapa", "Gráficos", "Cerrar sesión"])
-
-    if opcion == "Inicio":
-        st.title("Sistema de Monitoreo Ambiental")
-        st.markdown("Bienvenido a Polaris Web, visualiza y analiza datos ambientales en tiempo real.")
-    elif opcion == "Mapa":
-        st.subheader("Estaciones en Mapa")
-        df = pd.read_csv("estaciones.csv")
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=pdk.ViewState(
-                latitude=df["lat"].mean(),
-                longitude=df["lon"].mean(),
-                zoom=6,
-                pitch=50,
-            ),
-            layers=[
-                pdk.Layer(
-                    'ScatterplotLayer',
-                    data=df,
-                    get_position='[lon, lat]',
-                    get_color='[0, 112, 255, 160]',
-                    get_radius=2500,
-                ),
-            ],
-        ))
-    elif opcion == "Gráficos":
-        st.subheader("Temperatura y Precipitación")
-        df = pd.read_csv("estaciones.csv")
-        st.line_chart(df[["temperatura", "precipitacion"]])
-    elif opcion == "Cerrar sesión":
-        st.session_state.logged_in = False
-        st.experimental_rerun()
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
