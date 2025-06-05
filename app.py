@@ -102,66 +102,72 @@ div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* --- Estilos para el menú lateral --- */
+/* --- Estilos para el menú lateral (REVISADO Y MEJORADO) --- */
 [data-testid="stSidebar"] {{
     background-color: #1A2437; /* Color de fondo oscuro similar al ejemplo */
     color: white;
     padding-top: 20px;
-    padding-left: 10px;
+    padding-left: 0px; /* Ajustado para que las opciones empiecen más a la izquierda */
+    padding-right: 0px;
 }}
 
+[data-testid="stSidebar"] .stRadio {{
+    width: 100%; /* Asegura que el contenedor del radio ocupe todo el ancho */
+}}
+
+/* Estilo general para cada opción del menú */
 [data-testid="stSidebar"] .stRadio > label {{
     font-size: 1rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.85); /* Un blanco ligeramente menos puro */
-    padding: 10px 15px;
-    margin-bottom: 5px;
-    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.7); /* Blanco más suave para las opciones no seleccionadas */
+    padding: 12px 20px; /* Más padding para un mejor espaciado */
+    margin-bottom: 0px; /* Elimina el margen inferior entre elementos */
+    border-radius: 0px; /* Bordes rectos para un look más moderno */
     transition: background-color 0.2s ease, color 0.2s ease;
     display: flex;
-    align-items: center; /* Para alinear con iconos si los hubiera */
+    align-items: center;
+    width: 100%; /* Ocupa todo el ancho disponible */
 }}
 
+/* Estado hover para las opciones */
 [data-testid="stSidebar"] .stRadio > label:hover {{
-    background-color: #2D3E5E; /* Color de fondo al pasar el ratón */
-    color: white;
+    background-color: #2D3E5E; /* Color de fondo al pasar el ratón, ligeramente más claro */
+    color: white; /* Texto blanco puro al hacer hover */
+    cursor: pointer; /* Indicar que es clickeable */
+}}
+
+/* Ocultar el círculo de radio nativo de Streamlit */
+[data-testid="stSidebar"] .stRadio > label > div:first-child {{
+    display: none !important; /* Elimina completamente el círculo */
 }}
 
 /* Estilo para la opción seleccionada */
-[data-testid="stSidebar"] .stRadio > label[data-baseweb="radio"] > div:first-child {{
-    background-color: transparent !important; /* Quita el círculo de radio nativo */
-    border: none !important;
-}}
-
-[data-testid="stSidebar"] .stRadio > label[data-baseweb="radio"] > div:first-child > div {{
-    background-color: transparent !important; /* Quita el círculo de radio nativo interno */
-}}
-
 [data-testid="stSidebar"] .stRadio > label[data-baseweb="radio"][aria-checked="true"] {{
-    background-color: #0E1629; /* Color de fondo para la opción seleccionada */
-    color: white;
-    font-weight: 600;
+    background-color: #0E1629; /* Fondo más oscuro para la opción seleccionada */
+    color: white; /* Texto blanco puro para la opción seleccionada */
+    font-weight: 600; /* Ligeramente más negrita para resaltar */
 }}
 
 /* Estilo para el título del menú en la sidebar */
 [data-testid="stSidebar"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem; /* Más espacio debajo del título */
     font-size: 1.8rem;
-    padding-left: 10px;
+    padding: 0 20px; /* Padding izquierdo/derecho para el título */
 }}
 
-/* Para hacer los elementos de lista del radio más como enlaces */
-.stRadio div[role="radiogroup"] > label {{
-    margin-left: 0; /* Asegura que no haya indentación */
+/* Asegurar que el contenedor del radio no agregue margen */
+.stRadio div[role="radiogroup"] {{
+    padding: 0;
 }}
 
-/* Quitar el marcador de círculo del radio button */
-.stRadio > label > div:first-child {{
-    display: none !important;
+/* Para los iconos si los hubiera, margen a la derecha del icono */
+.stRadio > label > div[data-testid="stMarkdownContainer"] {{
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre icono y texto */
 }}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -183,15 +189,12 @@ def login():
     if st.button("Login"):
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
-            # Al iniciar sesión, seteamos la selección inicial del menú
-            # Aseguramos que 'Tablero' sea una opción válida en menu_options
             st.session_state.menu_selection = "Tablero"
             st.rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
 
 def dashboard():
-    # Define las opciones del menú con los títulos que ves en el ejemplo
     menu_options = [
         "Tablero",
         "GIS",
@@ -213,31 +216,44 @@ def dashboard():
         "Módulos",
         "Túnel",
         "Validador",
-        "Cerrar sesión" # Añadimos Cerrar sesión aquí para que esté en el menú
+        "Cerrar sesión"
     ]
 
-    # --- CAMBIO IMPORTANTE AQUÍ ---
-    # Asegúrate de que 'menu_selection' esté inicializado y sea una opción válida
     if "menu_selection" not in st.session_state or st.session_state.menu_selection not in menu_options:
-        st.session_state.menu_selection = menu_options[0] # Siempre usa la primera opción como default
-    # --- FIN DEL CAMBIO ---
+        st.session_state.menu_selection = menu_options[0]
 
-    st.sidebar.title("Menú Principal") # Título para la barra lateral
+    st.sidebar.title("Menú Principal")
 
-    # Usar st.radio para el menú en la barra lateral
-    selected_option = st.sidebar.radio(
-        "Navegación", # Etiqueta del radio, puede ser vacía "" si no quieres texto
-        options=menu_options,
-        index=menu_options.index(st.session_state.menu_selection), # Mantiene la opción seleccionada
-        key="main_menu_radio" # Clave única para el widget
+    # Si quieres añadir un icono a "Tablero", puedes hacerlo así:
+    # Opción 1: Usando la lista de opciones con emojis o caracteres unicode
+    # Esto es limitado pero fácil:
+    display_options = [
+        "🏠 Tablero" if opt == "Tablero" else opt for opt in menu_options
+    ]
+
+    # Opción 2 (más avanzada, si usas st-pages o similares):
+    # Podrías pasar una lista de diccionarios con 'label' y 'icon'
+
+    selected_option_display = st.sidebar.radio(
+        "Navegación",
+        options=display_options,
+        index=display_options.index(
+            "🏠 " + st.session_state.menu_selection if st.session_state.menu_selection == "Tablero" else st.session_state.menu_selection
+        ), # Ajusta el índice para que coincida con la opción de display
+        key="main_menu_radio",
+        label_visibility="collapsed" # Oculta la etiqueta "Navegación"
     )
 
-    # Actualiza la sesión de estado si la opción cambia
-    if selected_option != st.session_state.menu_selection:
-        st.session_state.menu_selection = selected_option
-        st.rerun() # Para que se recargue y muestre el contenido de la nueva sección
+    # Convertir de vuelta a la opción original para el manejo de contenido
+    # Quita el emoji '🏠 ' si está presente
+    actual_selected_option = selected_option_display.replace("🏠 ", "")
+
+    if actual_selected_option != st.session_state.menu_selection:
+        st.session_state.menu_selection = actual_selected_option
+        st.rerun()
 
     # --- Contenido principal basado en la selección del menú ---
+    # Usa actual_selected_option para el control de flujo
     if st.session_state.menu_selection == "Tablero":
         st.title("Tablero de Control")
         st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
@@ -247,7 +263,6 @@ def dashboard():
     elif st.session_state.menu_selection == "Mapa GIS":
         st.subheader("Mapa GIS Interactivo")
         st.write("Visualiza tus estaciones y datos en un mapa detallado.")
-        # Reutilizamos el código del mapa que ya tenías
         try:
             df = pd.read_csv("estaciones.csv")
             st.pydeck_chart(pdk.Deck(
@@ -323,14 +338,9 @@ def dashboard():
         st.write("Valida la calidad y consistencia de tus datos.")
     elif st.session_state.menu_selection == "Cerrar sesión":
         st.session_state.logged_in = False
-        # Al cerrar sesión, el 'logged_in' se vuelve False, y el flujo va a login()
-        # No necesitamos setear menu_selection a "Inicio" aquí porque al volver a login,
-        # y luego a dashboard (si se loguea de nuevo), la inicialización en dashboard
-        # se encargará de esto.
         st.rerun()
 
 if st.session_state.logged_in:
     dashboard()
 else:
     login()
-        
