@@ -610,4 +610,4 @@ def dashboard():
             else:
                 filtered_df = df
 
-            if search_stat
+            # CORRECCIÓN D
