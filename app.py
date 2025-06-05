@@ -37,6 +37,8 @@ st.markdown(f"""
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white; /* Default text color, will be overridden by overlay */
     position: relative; /* Needed for the overlay */
+    /* Posiblemente reducir el padding superior por defecto de Streamlit */
+    padding-top: 0rem; /* Añadido/Ajustado: Intenta reducir el padding superior del contenedor principal */
 }}
 
 /* Overlay for background image to ensure text legibility */
@@ -55,9 +57,9 @@ st.markdown(f"""
 /* Logo container styles */
 .logo-container {{
     text-align: center;
-    /* Reducimos el margen superior para subir el contenido */
-    margin-top: 2rem; /* Antes 4rem */
-    margin-bottom: 1.5rem; /* Antes 2rem */
+    /* REDUCIMOS MÁS EL MARGEN SUPERIOR PARA SUBIR EL LOGO Y EL FORMULARIO */
+    margin-top: 0.5rem; /* Antes 2rem, intentemos 0.5rem o incluso 0 */
+    margin-bottom: 1rem; /* Antes 1.5rem, lo hacemos un poco más compacto */
 }}
 
 .logo-container img {{
@@ -67,13 +69,13 @@ st.markdown(f"""
     margin: 0 auto;
 }}
 
-/* General H1 styles */
+/* General H1 styles (para cuando no hay logo) */
 h1 {{
     color: white;
     text-align: center;
-    /* Reducimos el margen superior aquí también si no hay logo */
-    margin-top: 2rem; /* Antes 4rem */
-    margin-bottom: 1.5rem; /* Antes 2rem */
+    /* Ajustamos también aquí si no hay logo */
+    margin-top: 0.5rem; /* Antes 2rem */
+    margin-bottom: 1rem; /* Antes 1.5rem */
 }}
 
 /* Button styles */
@@ -98,7 +100,7 @@ h1 {{
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem; /* Reducido para compactar las etiquetas */
     display: block;
     color: white; /* Ensure labels are white and clearly visible */
 }}
@@ -107,7 +109,7 @@ div.stTextInput > label {{
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
-    margin-bottom: 1.5rem !important; /* Mantenemos este margen para separar los campos */
+    margin-bottom: 1rem !important; /* Reducido para compactar los campos */
     border-radius: 10px !important;
     border: none !important;
     font-size: 1rem !important;
@@ -265,6 +267,28 @@ div.stSelectbox > label {{
     margin-top: 1rem; /* Space between controls and map */
 }}
 
+/* NEW: Flexbox container for login elements to vertically center or align */
+.main-login-container {{
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra verticalmente el contenido */
+    align-items: center; /* Centra horizontalmente el contenido (para los elementos flex) */
+    min-height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la vista */
+    padding: 1rem; /* Añade un poco de padding para no pegar el contenido a los bordes */
+    box-sizing: border-box; /* Incluye el padding en el cálculo del ancho/alto */
+}}
+
+/* RE-ADJUST Streamlit's main content wrapper to center */
+[data-testid="stVerticalBlock"] {{
+    max-width: 400px; /* Limita el ancho del formulario para que no se extienda demasiado */
+    width: 90%; /* Ancho responsivo */
+    margin: auto; /* Centra el bloque verticalmente */
+    padding: 20px; /* Añade padding interno para que el contenido no pegue a los bordes */
+    background-color: rgba(0, 0, 0, 0.3); /* Un fondo sutil para el formulario en sí, si se quiere */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -272,6 +296,12 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
+    # Añadimos un div contenedor para todo el contenido de login
+    # Esto es más bien para propósitos de CSS que Streamlit pueda inyectar directamente
+    # Streamlit ya envuelve el contenido en un stVerticalBlock por defecto,
+    # así que vamos a apuntar a ese test-id si es posible.
+    # No es necesario envolver aquí con markdown si los CSS apuntan a los elementos de Streamlit directamente.
+
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
@@ -280,6 +310,8 @@ def login():
         """, unsafe_allow_html=True)
     else:
         st.title("Polaris Web")
+
+    # Los elementos de st.text_input y st.button serán contenidos por un stVerticalBlock
 
     usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
     contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
@@ -478,43 +510,4 @@ def dashboard():
             initial_zoom = 5 if not filtered_df.empty else 10 # Zoom más cercano si hay datos
 
             st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9',
-                initial_view_state=pdk.ViewState(
-                    latitude=initial_latitude,
-                    longitude=initial_longitude,
-                    zoom=initial_zoom,
-                    pitch=50,
-                ),
-                layers=[
-                    pdk.Layer(
-                        'ScatterplotLayer',
-                        data=filtered_df,
-                        get_position='[lon, lat]',
-                        get_color=get_color,
-                        get_radius=2500,
-                        pickable=True, # Permite que los puntos sean clickeables
-                    ),
-                ],
-            ))
-
-        except FileNotFoundError:
-            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
-        except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
-
-
-    elif st.session_state.menu_selection == "Visor":
-        st.title("Visor de Datos")
-        st.write("Accede a herramientas avanzadas para la visualización de series de tiempo.")
-    elif st.session_state.menu_selection == "Fast Viewer":
-        st.title("Visor Rápido")
-        st.write("Visualización rápida de datos en tiempo real.")
-    elif st.session_state.menu_selection == "Estaciones":
-        st.title("Gestión de Estaciones")
-        st.write("Administra y consulta información de tus estaciones de monitoreo.")
-    elif st.session_state.menu_selection == "Monitoring":
-        st.title("Monitoreo en Tiempo Real")
-        st.write("Sigue los parámetros clave en tiempo real.")
-    elif st.session_state.menu_selection == "Informe personalizado":
-        st.title("Informes Personalizados")
-        st.write("Genera informes a medida según tus neces
+                map_style='mapbox://styles/mapbox/
