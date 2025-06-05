@@ -36,13 +36,20 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    /* Añadimos flexbox para controlar la alineación vertical */
+    display: flex;
+    flex-direction: column;
+    /* Esto es clave: alinea los ítems al inicio del contenedor (arriba) */
+    justify-content: flex-start; 
+    align-items: center; /* Centra horizontalmente el contenido */
+    padding-top: 0; /* Asegurarse de que no haya padding superior en el contenedor principal */
 }}
 
 /* Logo container styles */
 .logo-container {{
     text-align: center;
-    margin-top: 1rem; /* Reducido de 4rem a 1rem para subirlo */
-    margin-bottom: 2rem;
+    margin-top: 0.5rem; /* Reducido al mínimo */
+    margin-bottom: 1rem; /* Ajustar según sea necesario */
 }}
 
 .logo-container img {{
@@ -56,8 +63,8 @@ st.markdown(f"""
 h1 {{
     color: white;
     text-align: center;
-    margin-top: 1rem; /* Reducido de 4rem a 1rem para subirlo */
-    margin-bottom: 2rem;
+    margin-top: 0.5rem; /* Reducido al mínimo */
+    margin-bottom: 1rem; /* Ajustar según sea necesario */
 }}
 
 /* Button styles */
