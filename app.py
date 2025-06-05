@@ -41,7 +41,7 @@ st.markdown(f"""
 /* Logo container styles */
 .logo-container {{
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 1rem; /* Reducido de 4rem a 1rem para subirlo */
     margin-bottom: 2rem;
 }}
 
@@ -56,7 +56,7 @@ st.markdown(f"""
 h1 {{
     color: white;
     text-align: center;
-    margin-top: 4rem;
+    margin-top: 1rem; /* Reducido de 4rem a 1rem para subirlo */
     margin-bottom: 2rem;
 }}
 
@@ -513,4 +513,3 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-
