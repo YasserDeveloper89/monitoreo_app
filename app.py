@@ -4,27 +4,27 @@ import pydeck as pdk
 import base64
 import re
 
+# --- Configuración de usuarios y la página ---
 USERS = {"admin": "1234"}
-
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
+# --- Funciones de utilidad para cargar imágenes ---
 def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+    """Convierte un archivo binario (ej. imagen) a una cadena base64."""
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        st.error(f"Error: '{bin_file}' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
+        return "" # Retorna una cadena vacía en caso de error
 
-try:
-    img_base64 = get_base64_of_bin_file("fondo.jpg")
-except FileNotFoundError:
-    st.error("Error: 'fondo.jpg' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
-    img_base64 = ""
+# Cargar imágenes de fondo y logo
+img_base64 = get_base64_of_bin_file("fondo.jpg")
+logo_base64 = get_base64_of_bin_file("adrlogo.png")
 
-try:
-    logo_base64 = get_base64_of_bin_file("adrlogo.png")
-except FileNotFoundError:
-    st.error("Error: 'adrlogo.png' no encontrado. Asegúrate de que el logo esté en el mismo directorio que el script.")
-    logo_base64 = ""
-
+# --- Estilos CSS inyectados en Streamlit ---
+# Se utiliza un f-string para insertar las imágenes base64 directamente en el CSS
 st.markdown(f"""
 <style>
 /* Base container for the app view */
@@ -284,10 +284,12 @@ div.stSelectbox > label {{
 </style>
 """, unsafe_allow_html=True)
 
+# --- Lógica de autenticación ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
+    """Muestra la interfaz de inicio de sesión."""
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
@@ -302,12 +304,14 @@ def login():
     if st.button("Login"):
         if USERS.get(usuario) == contrasena:
             st.session_state.logged_in = True
-            st.session_state.menu_selection = "Tablero"
-            st.rerun()
+            st.session_state.menu_selection = "Tablero" # Establece una selección inicial
+            st.rerun() # Reinicia la aplicación para mostrar el dashboard
         else:
             st.error("Usuario o contraseña incorrectos.")
 
+# --- Función principal del Dashboard ---
 def dashboard():
+    """Muestra el dashboard de la aplicación con navegación lateral."""
     menu_options = [
         "Tablero",
         "GIS",
@@ -332,11 +336,13 @@ def dashboard():
         "Cerrar sesión"
     ]
 
+    # Asegura que siempre haya una selección válida en el estado de la sesión
     if "menu_selection" not in st.session_state or st.session_state.menu_selection not in menu_options:
-        st.session_state.menu_selection = menu_options[0]
+        st.session_state.menu_selection = menu_options[0] # Selecciona el primer elemento por defecto
 
     st.sidebar.title("Menú Principal")
 
+    # Prepara las opciones del menú para mostrar con emojis
     display_options = []
     for opt in menu_options:
         if opt == "Tablero": display_options.append("🏠 Tablero")
@@ -360,18 +366,19 @@ def dashboard():
         elif opt == "Túnel": display_options.append("🔗 Túnel")
         elif opt == "Validador": display_options.append("✅ Validador")
         elif opt == "Cerrar sesión": display_options.append("🚪 Cerrar sesión")
-        else: display_options.append(opt)
+        else: display_options.append(opt) # En caso de que se añada una opción no mapeada
 
+    # Encuentra la opción de visualización actual para establecer el índice inicial del radio
     current_selected_display_option = st.session_state.menu_selection
-    for opt in display_options:
-        # Regex para limpiar el emoji y el espacio inicial para la comparación
-        clean_opt = re.sub(r'^\S+\s+', '', opt).strip()
-        if clean_opt == st.session_state.menu_selection:
-            current_selected_display_option = opt
+    for opt_display in display_options:
+        clean_opt_display = re.sub(r'^\S+\s+', '', opt_display).strip()
+        if clean_opt_display == st.session_state.menu_selection:
+            current_selected_display_option = opt_display
             break
 
     selected_index = display_options.index(current_selected_display_option)
 
+    # Crea el radio button en la barra lateral
     selected_option_display = st.sidebar.radio(
         "Navegación",
         options=display_options,
@@ -380,19 +387,24 @@ def dashboard():
         label_visibility="collapsed"
     )
 
+    # Extrae el nombre real de la opción seleccionada (sin el emoji)
     actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display).strip()
 
+    # Si la opción seleccionada ha cambiado, actualiza el estado de la sesión y reinicia la aplicación
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
         st.rerun()
 
     # --- Contenido principal basado en la selección del menú ---
+    # CADA 'elif' DEBE TERMINAR CON ':'
     if st.session_state.menu_selection == "Tablero":
         st.title("Tablero de Control")
         st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
+
     elif st.session_state.menu_selection == "GIS":
         st.title("Información Geográfica")
         st.write("Explora datos GIS relevantes para tus proyectos.")
+
     elif st.session_state.menu_selection == "Mapa GIS":
         st.subheader("Mapa GIS")
 
@@ -403,9 +415,14 @@ def dashboard():
             st.caption("Buscar estación")
             station_names = ["Todas las estaciones"]
             try:
-                station_names.extend(list(pd.read_csv("estaciones.csv")["nombre"].unique()))
+                # Asegúrate de que 'estaciones.csv' exista y tenga una columna 'nombre'
+                df_stations_load = pd.read_csv("estaciones.csv")
+                station_names.extend(list(df_stations_load["nombre"].unique()))
             except FileNotFoundError:
                 st.warning("El archivo 'estaciones.csv' no fue encontrado para cargar nombres de estación.")
+            except KeyError:
+                st.warning("La columna 'nombre' no se encontró en 'estaciones.csv'.")
+
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -502,9 +519,12 @@ def dashboard():
         with col_est1:
             station_names_filter = ["Todas las estaciones"]
             try:
-                station_names_filter.extend(list(pd.read_csv("estaciones.csv")["nombre"].unique()))
+                df_stations_load = pd.read_csv("estaciones.csv")
+                station_names_filter.extend(list(df_stations_load["nombre"].unique()))
             except FileNotFoundError:
-                pass # Manejado arriba
+                pass # El error se maneja arriba, aquí solo intentamos cargar
+            except KeyError:
+                pass # El error se maneja arriba, aquí solo intentamos cargar
             st.selectbox("Estación", station_names_filter, key="estacion_filter")
             st.selectbox("Estado de la estación", ["Todos los estados", "Activa", "Inactiva", "Mantenimiento"], key="estado_estacion_filter")
 
@@ -516,29 +536,4 @@ def dashboard():
             st.selectbox("Intervalo de transmisión", ["Todos los intervalos", "5 min", "15 min", "1 hora"], key="intervalo_transmision_filter")
             st.text_input("Customer ID", placeholder="Introduce el ID del cliente", key="customer_id_filter")
 
-        st.button("Aplicar Filtros", key="aplicar_estaciones_filter_button", type="primary")
-
-        st.subheader("Lista de Estaciones")
-        try:
-            df_estaciones_raw = pd.read_csv("estaciones.csv")
-            # Aquí podrías aplicar la lógica de filtrado real basada en los selectbox/text_input
-            # Por ahora, solo muestra el DataFrame completo como ejemplo
-            st.dataframe(df_estaciones_raw, use_container_width=True)
-        except FileNotFoundError:
-            st.info("No se encontró el archivo 'estaciones.csv'. Por favor, asegúrate de que el archivo existe y contiene los datos de las estaciones.")
-        except Exception as e:
-            st.error(f"Error al cargar la lista de estaciones: {e}")
-
-    elif st.session_state.menu_selection == "Monitoring":
-        st.title("Monitoreo en Tiempo Real")
-        st.write("Sigue los parámetros clave en tiempo real.")
-    elif st.session_state.menu_selection == "Informe personalizado":
-        st.title("Informes Personalizados")
-        st.write("Genera informes a medida según tus necesidades.")
-    elif st.session_state.menu_selection == "Informe rosa de los vientos":
-        st.title("Informe Rosa de los Vientos")
-        st.write("Visualiza patrones de dirección y velocidad del viento.")
-    elif st.session_state.menu_selection == "Consecutive Rains":
-        st.title("Análisis de Lluvias Consecutivas")
-        st.write("Herramientas para analizar eventos de lluvia prolongados.")
-    elif st.session_state.me
+     
