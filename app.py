@@ -16,7 +16,7 @@ img_base64 = get_base64_of_bin_file("fondo.jpg")
 
 st.markdown(f"""
 <style>
-/* Fondo de toda la página */
+/* Fondo */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -24,41 +24,42 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Roboto', sans-serif;
+    color: white;
 }}
 
-/* Cuadro oscuro centrado */
+/* Contenedor login */
 .login-box {{
     background-color: rgba(0, 0, 0, 0.75);
-    padding: 2.5rem 2rem;
+    padding: 3rem 2.5rem;
     border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
-    color: white;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
     max-width: 400px;
-    margin: 10vh auto; /* centra verticalmente con espacio arriba y abajo */
+    margin: 10vh auto;
     text-align: center;
 }}
 
-/* Título blanco */
+/* Título */
 .login-box h1 {{
     color: white;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    font-size: 2.4rem;
 }}
 
-/* Labels visibles y con estilo */
+/* Labels */
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
     display: block;
     color: white;
 }}
 
-/* Inputs estilizados */
+/* Inputs */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
-    margin-bottom: 1.2rem !important;
+    margin-bottom: 1.5rem !important;
     border-radius: 8px !important;
     border: none !important;
     font-size: 1rem !important;
@@ -67,21 +68,21 @@ div.stTextInput > div > input {{
     transition: box-shadow 0.3s ease !important;
 }}
 
-/* Focus en inputs */
+/* Input focus */
 div.stTextInput > div > input:focus {{
     box-shadow: 0 0 8px 2px #1E90FF !important;
 }}
 
-/* Botón estilizado con texto "Login" */
+/* Botón */
 div.stButton > button {{
     width: 100% !important;
-    padding: 0.75rem 1rem !important;
+    padding: 0.8rem 1rem !important;
     background-color: #1E90FF !important;
     border: none !important;
     border-radius: 8px !important;
     color: white !important;
     font-weight: 700 !important;
-    font-size: 1.1rem !important;
+    font-size: 1.2rem !important;
     cursor: pointer !important;
     transition: background-color 0.3s ease !important;
 }}
@@ -97,15 +98,17 @@ def login():
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
     st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
 
-    usuario = st.text_input("Nombre de usuario", key="user")
-    contrasena = st.text_input("Contraseña", type="password", key="pwd")
-    boton = st.button("Login")
+    with st.form(key="login_form"):
+        usuario = st.text_input("Nombre de usuario")
+        contrasena = st.text_input("Contraseña", type="password")
+        submit_btn = st.form_submit_button("Login")
 
-    if boton:
-        if USERS.get(usuario) == contrasena:
-            st.session_state.logged_in = True
-        else:
-            st.error("Usuario o contraseña incorrectos.")
+        if submit_btn:
+            if USERS.get(usuario) == contrasena:
+                st.session_state.logged_in = True
+            else:
+                st.error("Usuario o contraseña incorrectos.")
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 
