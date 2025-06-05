@@ -1,26 +1,35 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
+import base64
 
 # Simulación de usuarios
 USERS = {"admin": "1234"}
 
 st.set_page_config(page_title="Polaris Web", layout="centered")
 
-# CSS para diseño visual moderno
-st.markdown("""
+# Función para convertir imagen a base64
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+img_base64 = get_base64_of_bin_file("fondo.jpg")
+
+# CSS para diseño visual moderno con imagen base64 embebida
+st.markdown(f"""
     <style>
-    .login-container {
+    .login-container {{
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 90vh;
-        background-image: url('fondo.jpg');
+        background-image: url("data:image/jpg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
-    }
-    .login-box {
+    }}
+    .login-box {{
         background-color: rgba(255, 255, 255, 0.92);
         padding: 3rem 2rem;
         border-radius: 12px;
@@ -28,12 +37,12 @@ st.markdown("""
         text-align: center;
         width: 100%;
         max-width: 400px;
-    }
-    .login-box h1 {
+    }}
+    .login-box h1 {{
         color: #1E90FF;
         font-size: 2rem;
         margin-bottom: 1rem;
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -42,14 +51,20 @@ def login():
     st.markdown('<h1>Polaris Web</h1>', unsafe_allow_html=True)
     user = st.text_input("Usuario")
     pwd = st.text_input("Contraseña", type="password")
-    if st.button("Iniciar sesión"):
+    login_btn = st.button("Iniciar sesión")
+    
+    if login_btn:
         if USERS.get(user) == pwd:
             st.session_state.logged_in = True
             st.success("Sesión iniciada correctamente.")
-            st.experimental_rerun()
         else:
             st.error("Usuario o contraseña incorrectos.")
+    
     st.markdown('</div></div>', unsafe_allow_html=True)
+
+    # Recarga la app solo si el usuario ya está logueado para evitar loops
+    if st.session_state.get("logged_in", False):
+        st.experimental_rerun()
 
 def dashboard():
     st.sidebar.title("Menú")
