@@ -16,15 +16,6 @@ img_base64 = get_base64_of_bin_file("fondo.jpg")
 
 st.markdown(f"""
 <style>
-/* Contenedor principal para centrar login */
-.login-wrapper {{
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}}
-
-/* Fondo con imagen */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -32,31 +23,33 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
 }}
 
-/* Formulario glassmorphism */
-.login-form {{
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    padding: 3rem 2.5rem;
-    max-width: 400px;
-    width: 90vw;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+h1 {{
     color: white;
     text-align: center;
-}} 
-
-.login-form h1 {{
-    font-weight: 700;
-    font-size: 2.5rem;
+    margin-top: 4rem;
     margin-bottom: 2rem;
-    color: white;
 }}
 
-/* Labels */
+.stButton > button {{
+    background-color: #1E90FF;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}}
+
+.stButton > button:hover {{
+    background-color: #1c7ed6;
+}}
+
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
@@ -65,7 +58,6 @@ div.stTextInput > label {{
     color: white;
 }}
 
-/* Inputs */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -74,70 +66,31 @@ div.stTextInput > div > input {{
     border: none !important;
     font-size: 1rem !important;
     outline: none !important;
-    box-shadow: none !important;
-    transition: box-shadow 0.3s ease !important;
     background-color: rgba(255, 255, 255, 0.25) !important;
     color: white !important;
 }}
 
-/* Input placeholder and text color */
 div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* Input focus */
-div.stTextInput > div > input:focus {{
-    box-shadow: 0 0 8px 2px #1E90FF !important;
-    background-color: rgba(255, 255, 255, 0.35) !important;
-}}
-
-/* Botón */
-div.stButton > button {{
-    width: 100% !important;
-    padding: 0.85rem 1rem !important;
-    background-color: #1E90FF !important;
-    border: none !important;
-    border-radius: 12px !important;
-    color: white !important;
-    font-weight: 700 !important;
-    font-size: 1.3rem !important;
-    cursor: pointer !important;
-    transition: background-color 0.3s ease !important;
-    box-shadow: 0 4px 15px rgba(30, 144, 255, 0.5);
-}}
-
-div.stButton > button:hover {{
-    background-color: #1c7ed6 !important;
-    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.7);
-}}
 </style>
 """, unsafe_allow_html=True)
 
-# Variable para evitar doble rerun
-if "login_submitted" not in st.session_state:
-    st.session_state.login_submitted = False
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
 def login():
-    st.markdown('<div class="login-wrapper"><div class="login-form">', unsafe_allow_html=True)
-    st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
-
-    with st.form(key="login_form"):
-        usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
-        contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
-        submit_btn = st.form_submit_button("Login")
-
-        if submit_btn:
-            st.session_state.login_submitted = True
-            if USERS.get(usuario) == contrasena:
-                st.session_state.logged_in = True
-            else:
-                st.error("Usuario o contraseña incorrectos.")
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
-    if st.session_state.login_submitted and st.session_state.get("logged_in", False):
-        st.session_state.login_submitted = False
-        st.experimental_rerun()
+    st.title("Polaris Web")
+    usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
+    contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
+    if st.button("Login"):
+        if USERS.get(usuario) == contrasena:
+            st.session_state.logged_in = True
+            st.success("Sesión iniciada correctamente.")
+            st.experimental_rerun()
+        else:
+            st.error("Usuario o contraseña incorrectos.")
 
 def dashboard():
     st.sidebar.title("Menú")
@@ -174,9 +127,6 @@ def dashboard():
     elif opcion == "Cerrar sesión":
         st.session_state.logged_in = False
         st.experimental_rerun()
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
 
 if st.session_state.logged_in:
     dashboard()
