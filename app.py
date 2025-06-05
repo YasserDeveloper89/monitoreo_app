@@ -16,7 +16,7 @@ img_base64 = get_base64_of_bin_file("fondo.jpg")
 
 st.markdown(f"""
 <style>
-/* Fondo */
+/* Fondo y centrado total */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -25,20 +25,23 @@ st.markdown(f"""
     height: 100vh;
     font-family: 'Roboto', sans-serif;
     color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }}
 
-/* Contenedor login */
+/* Caja negra centrada con transparencia */
 .login-box {{
     background-color: rgba(0, 0, 0, 0.75);
     padding: 3rem 2.5rem;
     border-radius: 15px;
     box-shadow: 0 0 25px rgba(0,0,0,0.6);
     max-width: 400px;
-    margin: 10vh auto;
+    width: 90vw;
     text-align: center;
 }}
 
-/* Título */
+/* Título dentro de la caja */
 .login-box h1 {{
     color: white;
     font-weight: 700;
@@ -73,14 +76,14 @@ div.stTextInput > div > input:focus {{
     box-shadow: 0 0 8px 2px #1E90FF !important;
 }}
 
-/* Botón */
+/* Botón con texto visible */
 div.stButton > button {{
     width: 100% !important;
     padding: 0.8rem 1rem !important;
     background-color: #1E90FF !important;
     border: none !important;
     border-radius: 8px !important;
-    color: white !important;
+    color: white !important;  /* Aseguramos color blanco */
     font-weight: 700 !important;
     font-size: 1.2rem !important;
     cursor: pointer !important;
