@@ -120,17 +120,17 @@ div.stTextInput > div > input::placeholder {{
     padding-top: 20px;
     padding-left: 0px;
     padding-right: 0px;
-    /* Aseguramos que el contenido pueda desplazarse si es muy largo */
-    overflow-y: auto;
-    /* Ajustamos la altura para que ocupe la pantalla, permitiendo scroll */
-    height: 100vh;
+    height: 100vh; /* Aseguramos que ocupe toda la altura */
+    display: flex; /* Usamos flexbox para gestionar el contenido interno */
+    flex-direction: column; /* Contenido apilado verticalmente */
 }}
 
-/* Nuevo: Asegurar que el contenedor de navegación dentro del sidebar también permita scroll */
-[data-testid="stSidebarNav"] {{
-    height: 100%; /* Ocupa la altura del padre (stSidebar) */
-    overflow-y: auto; /* Permite desplazamiento si su contenido es muy largo */
-    padding-bottom: 20px; /* Añade un pequeño padding al final para que la última opción no quede pegada */
+/* Nuevo y crítico: Contenedor del contenido del sidebar */
+/* Este es el que suele tener el scroll real si el contenido es largo */
+[data-testid="stSidebarContent"] {{
+    flex: 1; /* Permite que este elemento crezca y ocupe el espacio disponible */
+    overflow-y: auto; /* Habilitamos el scroll vertical si el contenido excede el espacio */
+    padding-bottom: 20px; /* Espacio para que la última opción no se pegue al borde */
 }}
 
 /* Title in the sidebar */
@@ -367,7 +367,6 @@ def dashboard():
 
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
-        # Este rerunning fuerza la actualización y, en muchos casos, colapsa el sidebar
         st.rerun()
 
     # --- Contenido principal basado en la selección del menú ---
@@ -530,4 +529,4 @@ if st.session_state.logged_in:
     dashboard()
 else:
     login()
-        
+            
