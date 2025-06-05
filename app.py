@@ -16,6 +16,14 @@ img_base64 = get_base64_of_bin_file("fondo.jpg")
 
 st.markdown(f"""
 <style>
+/* Contenedor principal para centrar login */
+.login-wrapper {{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}}
+
 /* Fondo con imagen */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
@@ -24,9 +32,6 @@ st.markdown(f"""
     background-repeat: no-repeat;
     height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }}
 
 /* Formulario glassmorphism */
@@ -48,6 +53,7 @@ st.markdown(f"""
     font-weight: 700;
     font-size: 2.5rem;
     margin-bottom: 2rem;
+    color: white;
 }}
 
 /* Labels */
@@ -107,8 +113,12 @@ div.stButton > button:hover {{
 </style>
 """, unsafe_allow_html=True)
 
+# Usamos flag para evitar doble rerun
+if "login_submitted" not in st.session_state:
+    st.session_state.login_submitted = False
+
 def login():
-    st.markdown('<div class="login-form">', unsafe_allow_html=True)
+    st.markdown('<div class="login-wrapper"><div class="login-form">', unsafe_allow_html=True)
     st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
 
     with st.form(key="login_form"):
@@ -117,13 +127,18 @@ def login():
         submit_btn = st.form_submit_button("Login")
 
         if submit_btn:
+            st.session_state.login_submitted = True
             if USERS.get(usuario) == contrasena:
                 st.session_state.logged_in = True
-                st.experimental_rerun()
             else:
                 st.error("Usuario o contraseña incorrectos.")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+    if st.session_state.login_submitted and st.session_state.get("logged_in", False):
+        # Reseteamos flag y rerun para cargar dashboard
+        st.session_state.login_submitted = False
+        st.experimental_rerun()
 
 def dashboard():
     st.sidebar.title("Menú")
@@ -132,39 +147,4 @@ def dashboard():
     if opcion == "Inicio":
         st.title("Sistema de Monitoreo Ambiental")
         st.markdown("Bienvenido a Polaris Web, visualiza y analiza datos ambientales en tiempo real.")
-    elif opcion == "Mapa":
-        st.subheader("Estaciones en Mapa")
-        df = pd.read_csv("estaciones.csv")
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=pdk.ViewState(
-                latitude=df["lat"].mean(),
-                longitude=df["lon"].mean(),
-                zoom=6,
-                pitch=50,
-            ),
-            layers=[
-                pdk.Layer(
-                    'ScatterplotLayer',
-                    data=df,
-                    get_position='[lon, lat]',
-                    get_color='[0, 112, 255, 160]',
-                    get_radius=2500,
-                ),
-            ],
-        ))
-    elif opcion == "Gráficos":
-        st.subheader("Temperatura y Precipitación")
-        df = pd.read_csv("estaciones.csv")
-        st.line_chart(df[["temperatura", "precipitacion"]])
-    elif opcion == "Cerrar sesión":
-        st.session_state.logged_in = False
-        st.experimental_rerun()
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
+    elif
