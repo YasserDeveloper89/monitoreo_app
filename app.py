@@ -106,4 +106,53 @@ def login():
         if boton:
             if USERS.get(usuario) == contrasena:
                 st.session_state.logged_in = True
-                st.success("Sesión iniciada correctamente
+                st.success("Sesión iniciada correctamente.")
+                st.experimental_rerun()
+            else:
+                st.error("Usuario o contraseña incorrectos.")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+def dashboard():
+    st.sidebar.title("Menú")
+    opcion = st.sidebar.radio("Ir a", ["Inicio", "Mapa", "Gráficos", "Cerrar sesión"])
+
+    if opcion == "Inicio":
+        st.title("Sistema de Monitoreo Ambiental")
+        st.markdown("Bienvenido a Polaris Web, visualiza y analiza datos ambientales en tiempo real.")
+    elif opcion == "Mapa":
+        st.subheader("Estaciones en Mapa")
+        df = pd.read_csv("estaciones.csv")
+        st.pydeck_chart(pdk.Deck(
+            map_style='mapbox://styles/mapbox/light-v9',
+            initial_view_state=pdk.ViewState(
+                latitude=df["lat"].mean(),
+                longitude=df["lon"].mean(),
+                zoom=6,
+                pitch=50,
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    data=df,
+                    get_position='[lon, lat]',
+                    get_color='[0, 112, 255, 160]',
+                    get_radius=2500,
+                ),
+            ],
+        ))
+    elif opcion == "Gráficos":
+        st.subheader("Temperatura y Precipitación")
+        df = pd.read_csv("estaciones.csv")
+        st.line_chart(df[["temperatura", "precipitacion"]])
+    elif opcion == "Cerrar sesión":
+        st.session_state.logged_in = False
+        st.experimental_rerun()
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if st.session_state.logged_in:
+    dashboard()
+else:
+    login()
