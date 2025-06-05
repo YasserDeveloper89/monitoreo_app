@@ -153,7 +153,7 @@ div.stTextInput > div > input::placeholder {{
 }}
 
 /* Selected (active) state for menu options */
-[data-testid="stSidebar"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
+[data-testid="stSidebar"] .stRadio label[aria-checked="true"] {{
     background-color: #0E1629 !important; /* Darker background for selected item */
     color: white !important; /* Pure white text for selected item */
     font-weight: 600 !important; /* Slightly bolder */
@@ -244,6 +244,7 @@ div.stSelectbox > label {{
 }}
 
 /* Adjust margins for column layout in GIS Map */
+/* These are Streamlit's internal component classes, might change with versions */
 .st-emotion-cache-1jm692t, .st-emotion-cache-1jm692t > div {{
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
@@ -596,6 +597,7 @@ def dashboard():
             st.button("☰", key="map_filter_button")
 
         # --- PyDeck Map Section ---
+        # El bloque try-except se inicia aquí para cubrir toda la lógica del mapa.
         try:
             df = pd.read_csv("estaciones.csv")
             
@@ -605,9 +607,4 @@ def dashboard():
 
             if filter_option == "Activas":
                 filtered_df = df[df['estado'] == 'activa']
-            elif filter_option == "Inactivas":
-                filtered_df = df[df['estado'] == 'inactiva']
-            else:
-                filtered_df = df
-
-            # CORRECCIÓN D
+            elif filter_option == "Inactiv
