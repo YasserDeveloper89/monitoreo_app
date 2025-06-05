@@ -524,4 +524,4 @@ def dashboard():
             ))
 
         except FileNotFoundError:
-            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en e
+            st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el directo correcto")
