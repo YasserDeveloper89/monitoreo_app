@@ -249,6 +249,38 @@ div.stSelectbox > label {{
     margin-top: 1rem; /* Space between controls and map */
 }}
 
+/* Style for Supervisor cards */
+.supervisor-card {{
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    min-height: 180px; /* Para mantener altura consistente */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.supervisor-card:hover {{
+    transform: translateY(-5px);
+    background-color: rgba(255, 255, 255, 0.15);
+}}
+
+.supervisor-card h3 {{
+    color: white;
+    margin-bottom: 5px;
+    font-size: 1.4rem;
+}}
+
+.supervisor-card p {{
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -367,7 +399,11 @@ def dashboard():
 
         with col1:
             st.caption("Buscar estación")
-            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
+            station_names = ["Todas las estaciones"]
+            try:
+                station_names.extend(list(pd.read_csv("estaciones.csv")["nombre"].unique()))
+            except FileNotFoundError:
+                st.warning("El archivo 'estaciones.csv' no fue encontrado para cargar nombres de estación.")
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -397,22 +433,16 @@ def dashboard():
         # --- LÓGICA DE FILTRADO PARA EL MAPA ---
         try:
             df = pd.read_csv("estaciones.csv")
-            
-            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
-            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
 
-            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
-            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
                 df['estado'] = 'indefinido'
 
             # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
-                filtered_df = df[df['estado'] == 'activa']
+                filtered_df = df[df['estado'].str.lower() == 'activa']
             elif filter_option == "Inactivas":
-                filtered_df = df[df['estado'] == 'inactiva']
+                filtered_df = df[df['estado'].str.lower() == 'inactiva']
             else:
                 filtered_df = df
 
@@ -420,39 +450,38 @@ def dashboard():
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
-            st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
-            st.dataframe(filtered_df)
-            # ----------------------------------------------------------------------
-
             # Define los colores basados en el estado
             def get_color(row):
-                return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
+                return [0, 150, 0, 160] if row['estado'].lower() == 'activa' else [100, 100, 100, 160] # Verde vs Gris
 
-            st.pydeck_chart(pdk.Deck(
-                map_style='mapbox://styles/mapbox/light-v9',
-                initial_view_state=pdk.ViewState(
-                    latitude=filtered_df["lat"].mean() if not filtered_df.empty else 0,
-                    longitude=filtered_df["lon"].mean() if not filtered_df.empty else 0,
-                    zoom=5,
-                    pitch=50,
-                ),
-                layers=[
-                    pdk.Layer(
-                        'ScatterplotLayer',
-                        data=filtered_df,
-                        get_position='[lon, lat]',
-                        get_color=get_color,
-                        get_radius=2500,
+            if not filtered_df.empty:
+                st.pydeck_chart(pdk.Deck(
+                    map_style='mapbox://styles/mapbox/light-v9',
+                    initial_view_state=pdk.ViewState(
+                        latitude=filtered_df["lat"].mean(),
+                        longitude=filtered_df["lon"].mean(),
+                        zoom=5,
+                        pitch=50,
                     ),
-                ],
-            ))
+                    layers=[
+                        pdk.Layer(
+                            'ScatterplotLayer',
+                            data=filtered_df,
+                            get_position='[lon, lat]',
+                            get_color=get_color,
+                            get_radius=2500,
+                        ),
+                    ],
+                ))
+            else:
+                st.warning("No hay estaciones para mostrar con los filtros aplicados.")
 
         except FileNotFoundError:
             st.error("Error: 'estaciones.csv' no encontrado. Asegúrate de que el archivo existe en el mismo directorio que el script.")
         except KeyError as e:
-            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon', 'temperatura', 'precipitacion' Y 'estado'.")
-
+            st.error(f"Error en el CSV: Columna '{e}' no encontrada. Asegúrate de que 'estaciones.csv' tiene las columnas 'nombre', 'lat', 'lon' y 'estado'.")
+        except Exception as e:
+            st.error(f"Ocurrió un error inesperado al cargar el mapa: {e}")
 
     elif st.session_state.menu_selection == "Visor":
         st.title("Visor de Datos")
@@ -460,9 +489,44 @@ def dashboard():
     elif st.session_state.menu_selection == "Fast Viewer":
         st.title("Visor Rápido")
         st.write("Visualización rápida de datos en tiempo real.")
+
     elif st.session_state.menu_selection == "Estaciones":
         st.title("Gestión de Estaciones")
         st.write("Administra y consulta información de tus estaciones de monitoreo.")
+
+        # Controles de filtros basados en la imagen "Estaciones"
+        st.subheader("Filtros de Estaciones")
+        col_est1, col_est2, col_est3 = st.columns(3)
+        with col_est1:
+            station_names_filter = ["Todas las estaciones"]
+            try:
+                station_names_filter.extend(list(pd.read_csv("estaciones.csv")["nombre"].unique()))
+            except FileNotFoundError:
+                pass # Manejado arriba
+            st.selectbox("Estación", station_names_filter, key="estacion_filter")
+            st.selectbox("Estado de la estación", ["Todos los estados", "Activa", "Inactiva", "Mantenimiento"], key="estado_estacion_filter")
+
+        with col_est2:
+            st.selectbox("Tipo de estación", ["Todos los tipos", "Meteorológica", "Hidrológica", "Calidad del Aire"], key="tipo_estacion_filter")
+            st.selectbox("ID red", ["Todas las redes", "Red A", "Red B"], key="id_red_filter")
+
+        with col_est3:
+            st.selectbox("Intervalo de transmisión", ["Todos los intervalos", "5 min", "15 min", "1 hora"], key="intervalo_transmision_filter")
+            st.text_input("Customer ID", placeholder="Introduce el ID del cliente", key="customer_id_filter")
+
+        st.button("Aplicar Filtros", key="aplicar_estaciones_filter_button", type="primary")
+
+        st.subheader("Lista de Estaciones")
+        try:
+            df_estaciones_raw = pd.read_csv("estaciones.csv")
+            # Aquí podrías aplicar la lógica de filtrado real basada en los selectbox/text_input
+            # Por ahora, solo muestra el DataFrame completo como ejemplo
+            st.dataframe(df_estaciones_raw, use_container_width=True)
+        except FileNotFoundError:
+            st.info("No se encontró el archivo 'estaciones.csv'. Por favor, asegúrate de que el archivo existe y contiene los datos de las estaciones.")
+        except Exception as e:
+            st.error(f"Error al cargar la lista de estaciones: {e}")
+
     elif st.session_state.menu_selection == "Monitoring":
         st.title("Monitoreo en Tiempo Real")
         st.write("Sigue los parámetros clave en tiempo real.")
@@ -478,39 +542,4 @@ def dashboard():
     elif st.session_state.menu_selection == "Vistas":
         st.title("Vistas Predefinidas")
         st.write("Carga y guarda configuraciones de visualización de datos.")
-    elif st.session_state.menu_selection == "Sinóptico":
-        st.title("Diseñador de Sinópticos")
-        st.write("Crea o edita diagramas sinópticos de tus sistemas.")
-    elif st.session_state.menu_selection == "Sinópticos":
-        st.title("Sinópticos Existentes")
-        st.write("Lista de tus diagramas sinópticos.")
-    elif st.session_state.menu_selection == "Custom Synoptics":
-        st.title("Sinópticos Personalizados")
-        st.write("Gestiona tus sinópticos adaptados.")
-    elif st.session_state.menu_selection == "Supervisor":
-        st.title("Panel de Supervisor")
-        st.write("Herramientas para la supervisión y gestión de usuarios.")
-    elif st.session_state.menu_selection == "Estadísticas de red":
-        st.title("Estadísticas de la Red")
-        st.write("Consulta el rendimiento y estado de tu red de monitoreo.")
-    elif st.session_state.menu_selection == "Registros":
-        st.title("Historial de Registros")
-        st.write("Accede a los logs y registros de actividad del sistema.")
-    elif st.session_state.menu_selection == "Módulos":
-        st.title("Administración de Módulos")
-        st.write("Activa y desactiva módulos de la aplicación.")
-    elif st.session_state.menu_selection == "Túnel":
-        st.title("Configuración de Túnel")
-        st.write("Gestiona conexiones y túneles de comunicación.")
-    elif st.session_state.menu_selection == "Validador":
-        st.title("Herramienta de Validación")
-        st.write("Valida la calidad y consistencia de tus datos.")
-    elif st.session_state.menu_selection == "Cerrar sesión":
-        st.session_state.logged_in = False
-        st.rerun()
-
-if st.session_state.logged_in:
-    dashboard()
-else:
-    login()
-            
+    elif st.session_state
