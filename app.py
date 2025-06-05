@@ -40,7 +40,7 @@ st.markdown(f"""
     display: flex;
     flex-direction: column;
     /* Esto es clave: alinea los ítems al inicio del contenedor (arriba) */
-    justify-content: flex-start; 
+    justify-content: flex-start;
     align-items: center; /* Centra horizontalmente el contenido */
     padding-top: 0; /* Asegurarse de que no haya padding superior en el contenedor principal */
 }}
@@ -120,6 +120,10 @@ div.stTextInput > div > input::placeholder {{
     padding-top: 20px;
     padding-left: 0px;
     padding-right: 0px;
+    /* Aseguramos que el contenido pueda desplazarse si es muy largo */
+    overflow-y: auto;
+    /* Ajustamos la altura si es necesario para que quepa todo */
+    height: 100vh; 
 }}
 
 /* Title in the sidebar */
@@ -266,7 +270,7 @@ def login():
     if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
-            <img src="data:image/png;base64,{logo_base64}" alt="ADR Logo">
+            <img src="data:image:png;base64,{logo_base64}" alt="ADR Logo">
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -345,6 +349,7 @@ def dashboard():
 
     selected_index = display_options.index(current_selected_display_option)
 
+    # El cierre automático se manejará con el st.rerun() al cambiar la opción.
     selected_option_display = st.sidebar.radio(
         "Navegación",
         options=display_options,
@@ -357,6 +362,7 @@ def dashboard():
 
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
+        # Este rerunning fuerza la actualización y, en muchos casos, colapsa el sidebar
         st.rerun()
 
     # --- Contenido principal basado en la selección del menú ---
@@ -374,7 +380,17 @@ def dashboard():
 
         with col1:
             st.caption("Buscar estación")
-            station_names = ["Todas las estaciones"] + list(pd.read_csv("estaciones.csv")["nombre"].unique())
+            # Asumiendo que 'estaciones.csv' existe y tiene una columna 'nombre'
+            try:
+                df_stations = pd.read_csv("estaciones.csv")
+                station_names = ["Todas las estaciones"] + list(df_stations["nombre"].unique())
+            except FileNotFoundError:
+                st.error("Error: 'estaciones.csv' no encontrado.")
+                station_names = ["Todas las estaciones"] # Fallback
+            except KeyError:
+                st.error("Error: Columna 'nombre' no encontrada en 'estaciones.csv'.")
+                station_names = ["Todas las estaciones"] # Fallback
+
             search_station = st.selectbox(
                 "Search Station",
                 station_names,
@@ -405,17 +421,10 @@ def dashboard():
         try:
             df = pd.read_csv("estaciones.csv")
             
-            # --- YA NO NECESITAMOS SIMULAR LA COLUMNA 'estado' ---
-            # df['estado'] = df['temperatura'].apply(lambda x: 'activa' if x > 22 else 'inactiva')
-
-            # Pequeña verificación para asegurarnos de que la columna 'estado' existe en el DataFrame
-            # (Aunque ahora la tienes en el CSV, es una buena práctica defensiva)
             if 'estado' not in df.columns:
                 st.error("La columna 'estado' no se encontró en 'estaciones.csv'. Por favor, asegúrate de que el archivo contiene esta columna.")
-                # Si no existe, podemos asignar un valor predeterminado para evitar errores de PyDeck
                 df['estado'] = 'indefinido'
 
-            # Filtrar por estado si la opción no es 'Todas'
             if filter_option == "Activas":
                 filtered_df = df[df['estado'] == 'activa']
             elif filter_option == "Inactivas":
@@ -423,16 +432,12 @@ def dashboard():
             else:
                 filtered_df = df
 
-            # Lógica de búsqueda de estación (simple por nombre)
             if search_station != "Todas las estaciones":
                 filtered_df = filtered_df[filtered_df['nombre'] == search_station]
 
-            # --- Mantenemos la tabla para depuración, puedes quitarla si quieres ---
             st.write("Datos que se están enviando al mapa (con la columna 'estado' del CSV):")
             st.dataframe(filtered_df)
-            # ----------------------------------------------------------------------
 
-            # Define los colores basados en el estado
             def get_color(row):
                 return [0, 150, 0, 160] if row['estado'] == 'activa' else [100, 100, 100, 160] # Verde vs Gris
 
