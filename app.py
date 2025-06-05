@@ -34,13 +34,13 @@ st.markdown(f"""
     box-shadow: 0 0 20px rgba(0,0,0,0.6);
     color: white;
     max-width: 400px;
-    margin: 5vh auto; /* espacio arriba y abajo */
+    margin: 10vh auto; /* centra verticalmente con espacio arriba y abajo */
     text-align: center;
 }}
 
-/* Título */
+/* Título blanco */
 .login-box h1 {{
-    color: #1E90FF;
+    color: white;
     font-weight: 700;
     margin-bottom: 2rem;
 }}
@@ -92,27 +92,23 @@ div.stButton > button:hover {{
 </style>
 """, unsafe_allow_html=True)
 
+
 def login():
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        
-        # Título dentro del cuadro
-        st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    st.markdown("<h1>Polaris Web</h1>", unsafe_allow_html=True)
 
-        usuario = st.text_input("Nombre de usuario", key="user")
-        contrasena = st.text_input("Contraseña", type="password", key="pwd")
-        boton = st.button("Login")
+    usuario = st.text_input("Nombre de usuario", key="user")
+    contrasena = st.text_input("Contraseña", type="password", key="pwd")
+    boton = st.button("Login")
 
-        if boton:
-            if USERS.get(usuario) == contrasena:
-                st.session_state.logged_in = True
-                st.success("Sesión iniciada correctamente.")
-                st.experimental_rerun()
-            else:
-                st.error("Usuario o contraseña incorrectos.")
+    if boton:
+        if USERS.get(usuario) == contrasena:
+            st.session_state.logged_in = True
+            st.experimental_rerun()
+        else:
+            st.error("Usuario o contraseña incorrectos.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
 
 def dashboard():
     st.sidebar.title("Menú")
@@ -149,6 +145,7 @@ def dashboard():
     elif opcion == "Cerrar sesión":
         st.session_state.logged_in = False
         st.experimental_rerun()
+
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
