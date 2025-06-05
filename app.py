@@ -262,7 +262,7 @@ div.stSelectbox > label {{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
+}}
 
 .supervisor-card:hover {{
     transform: translateY(-5px);
@@ -542,4 +542,4 @@ def dashboard():
     elif st.session_state.menu_selection == "Vistas":
         st.title("Vistas Predefinidas")
         st.write("Carga y guarda configuraciones de visualización de datos.")
-    elif st.session_state
+    elif st.session_stat
