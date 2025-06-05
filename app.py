@@ -12,24 +12,21 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-# Asegúrate de que 'fondo.jpg' exista en el mismo directorio o proporciona la ruta completa.
 try:
     img_base64 = get_base64_of_bin_file("fondo.jpg")
 except FileNotFoundError:
     st.error("Error: 'fondo.jpg' no encontrado. Asegúrate de que la imagen esté en el mismo directorio que el script.")
-    img_base64 = "" # Para evitar errores si la imagen no se encuentra
+    img_base64 = ""
 
-# --- Nuevo código para el logo ---
 try:
     logo_base64 = get_base64_of_bin_file("adrlogo.png")
 except FileNotFoundError:
     st.error("Error: 'adrlogo.png' no encontrado. Asegúrate de que el logo esté en el mismo directorio que el script.")
-    logo_base64 = "" # Para evitar errores si la imagen no se encuentra
-
-# --- Fin del nuevo código para el logo ---
+    logo_base64 = ""
 
 st.markdown(f"""
 <style>
+/* Base container for the app view */
 [data-testid="stAppViewContainer"] {{
     background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
@@ -40,7 +37,7 @@ st.markdown(f"""
     color: white;
 }}
 
-/* Estilos para el logo */
+/* Logo container styles */
 .logo-container {{
     text-align: center;
     margin-top: 4rem;
@@ -48,12 +45,13 @@ st.markdown(f"""
 }}
 
 .logo-container img {{
-    max-width: 250px; /* Ajusta esto al tamaño deseado para tu logo */
+    max-width: 250px;
     height: auto;
     display: block;
     margin: 0 auto;
 }}
 
+/* General H1 styles */
 h1 {{
     color: white;
     text-align: center;
@@ -61,6 +59,7 @@ h1 {{
     margin-bottom: 2rem;
 }}
 
+/* Button styles */
 .stButton > button {{
     background-color: #1E90FF;
     color: white;
@@ -78,6 +77,7 @@ h1 {{
     background-color: #1c7ed6;
 }}
 
+/* Text input label styles */
 div.stTextInput > label {{
     font-weight: 600;
     font-size: 1rem;
@@ -86,6 +86,7 @@ div.stTextInput > label {{
     color: white;
 }}
 
+/* Text input field styles */
 div.stTextInput > div > input {{
     width: 100% !important;
     padding: 0.75rem 1rem !important;
@@ -102,72 +103,73 @@ div.stTextInput > div > input::placeholder {{
     color: rgba(255, 255, 255, 0.7) !important;
 }}
 
-/* --- Estilos para el menú lateral (REVISADO Y MEJORADO) --- */
+/* --- REVISED AND MORE AGGRESSIVE STYLES FOR THE SIDEBAR MENU --- */
+
+/* Overall sidebar background and spacing */
 [data-testid="stSidebar"] {{
-    background-color: #1A2437; /* Color de fondo oscuro similar al ejemplo */
+    background-color: #1A2437; /* Dark background */
     color: white;
     padding-top: 20px;
-    padding-left: 0px; /* Ajustado para que las opciones empiecen más a la izquierda */
+    padding-left: 0px;
     padding-right: 0px;
 }}
 
-[data-testid="stSidebar"] .stRadio {{
-    width: 100%; /* Asegura que el contenedor del radio ocupe todo el ancho */
-}}
-
-/* Estilo general para cada opción del menú */
-[data-testid="stSidebar"] .stRadio > label {{
-    font-size: 1rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7); /* Blanco más suave para las opciones no seleccionadas */
-    padding: 12px 20px; /* Más padding para un mejor espaciado */
-    margin-bottom: 0px; /* Elimina el margen inferior entre elementos */
-    border-radius: 0px; /* Bordes rectos para un look más moderno */
-    transition: background-color 0.2s ease, color 0.2s ease;
-    display: flex;
-    align-items: center;
-    width: 100%; /* Ocupa todo el ancho disponible */
-}}
-
-/* Estado hover para las opciones */
-[data-testid="stSidebar"] .stRadio > label:hover {{
-    background-color: #2D3E5E; /* Color de fondo al pasar el ratón, ligeramente más claro */
-    color: white; /* Texto blanco puro al hacer hover */
-    cursor: pointer; /* Indicar que es clickeable */
-}}
-
-/* Ocultar el círculo de radio nativo de Streamlit */
-[data-testid="stSidebar"] .stRadio > label > div:first-child {{
-    display: none !important; /* Elimina completamente el círculo */
-}}
-
-/* Estilo para la opción seleccionada */
-[data-testid="stSidebar"] .stRadio > label[data-baseweb="radio"][aria-checked="true"] {{
-    background-color: #0E1629; /* Fondo más oscuro para la opción seleccionada */
-    color: white; /* Texto blanco puro para la opción seleccionada */
-    font-weight: 600; /* Ligeramente más negrita para resaltar */
-}}
-
-/* Estilo para el título del menú en la sidebar */
+/* Title in the sidebar */
 [data-testid="stSidebar"] h1 {{
     color: white;
     text-align: left;
-    margin-bottom: 1.5rem; /* Más espacio debajo del título */
+    margin-bottom: 1.5rem;
     font-size: 1.8rem;
-    padding: 0 20px; /* Padding izquierdo/derecho para el título */
+    padding: 0 20px;
 }}
 
-/* Asegurar que el contenedor del radio no agregue margen */
-.stRadio div[role="radiogroup"] {{
+/* Ensure the radio group container fills the width */
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
+    width: 100%;
     padding: 0;
 }}
 
-/* Para los iconos si los hubiera, margen a la derecha del icono */
-.stRadio > label > div[data-testid="stMarkdownContainer"] {{
+/* Each radio option label (the clickable area) */
+[data-testid="stSidebar"] .stRadio label {{
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7) !important; /* Slightly faded white for unselected */
+    padding: 12px 20px !important; /* Increased padding for better click area */
+    margin-bottom: 0px !important; /* Remove space between items */
+    border-radius: 0px !important; /* Sharp corners like the example */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    display: flex !important; /* Use flexbox for icon/text alignment */
+    align-items: center !important;
+    width: 100% !important; /* Ensure it takes full width */
+}}
+
+/* Hover state for menu options */
+[data-testid="stSidebar"] .stRadio label:hover {{
+    background-color: #2D3E5E !important; /* Lighter background on hover */
+    color: white !important; /* Pure white text on hover */
+    cursor: pointer !important;
+}}
+
+/* Selected (active) state for menu options */
+[data-testid="stSidebar"] .stRadio label[data-baseweb="radio"][aria-checked="true"] {{
+    background-color: #0E1629 !important; /* Darker background for selected item */
+    color: white !important; /* Pure white text for selected item */
+    font-weight: 600 !important; /* Slightly bolder */
+}}
+
+/* This is the key to remove the native radio bullet point/circle */
+/* Target the div that contains the actual radio input element */
+[data-testid="stSidebar"] .stRadio label > div:first-child {{
+    display: none !important;
+}}
+
+/* If using markdown in label (for emojis/icons), ensure it's aligned */
+[data-testid="stSidebar"] .stRadio label > div[data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
-    gap: 10px; /* Espacio entre icono y texto */
+    gap: 10px; /* Space between icon and text */
 }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -175,14 +177,14 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 def login():
-    if logo_base64: # Solo muestra el logo si se cargó correctamente
+    if logo_base64:
         st.markdown(f"""
         <div class="logo-container">
             <img src="data:image/png;base64,{logo_base64}" alt="ADR Logo">
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.title("Polaris Web") # Fallback si el logo no se carga
+        st.title("Polaris Web")
 
     usuario = st.text_input("Nombre de usuario", placeholder="Introduce tu usuario")
     contrasena = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
@@ -224,36 +226,79 @@ def dashboard():
 
     st.sidebar.title("Menú Principal")
 
-    # Si quieres añadir un icono a "Tablero", puedes hacerlo así:
-    # Opción 1: Usando la lista de opciones con emojis o caracteres unicode
-    # Esto es limitado pero fácil:
-    display_options = [
-        "🏠 Tablero" if opt == "Tablero" else opt for opt in menu_options
-    ]
+    # Prepare options with emojis for display
+    display_options = []
+    for opt in menu_options:
+        if opt == "Tablero":
+            display_options.append("🏠 Tablero") # Add home emoji
+        elif opt == "GIS":
+            display_options.append("🌐 GIS") # Example globe emoji
+        elif opt == "Mapa GIS":
+            display_options.append("🗺️ Mapa GIS") # Example map emoji
+        elif opt == "Visor":
+            display_options.append("📊 Visor") # Example bar chart emoji
+        elif opt == "Supervisor":
+            display_options.append("🧑‍💻 Supervisor") # Example person emoji
+        elif opt == "Validador":
+            display_options.append("✅ Validador") # Example checkmark emoji
+        elif opt == "Registros":
+            display_options.append("📜 Registros") # Example scroll emoji
+        elif opt == "Módulos":
+            display_options.append("📦 Módulos") # Example box emoji
+        elif opt == "Túnel":
+            display_options.append("🔗 Túnel") # Example link emoji
+        elif opt == "Cerrar sesión":
+            display_options.append("🚪 Cerrar sesión") # Example door emoji
+        else:
+            display_options.append(opt)
 
-    # Opción 2 (más avanzada, si usas st-pages o similares):
-    # Podrías pasar una lista de diccionarios con 'label' y 'icon'
+
+    # Determine the index for the selected option in display_options
+    current_selected_display_option = st.session_state.menu_selection
+    if st.session_state.menu_selection == "Tablero":
+        current_selected_display_option = "🏠 Tablero"
+    elif st.session_state.menu_selection == "GIS":
+        current_selected_display_option = "🌐 GIS"
+    elif st.session_state.menu_selection == "Mapa GIS":
+        current_selected_display_option = "🗺️ Mapa GIS"
+    elif st.session_state.menu_selection == "Visor":
+        current_selected_display_option = "📊 Visor"
+    elif st.session_state.menu_selection == "Supervisor":
+        current_selected_display_option = "🧑‍💻 Supervisor"
+    elif st.session_state.menu_selection == "Validador":
+        current_selected_display_option = "✅ Validador"
+    elif st.session_state.menu_selection == "Registros":
+        current_selected_display_option = "📜 Registros"
+    elif st.session_state.menu_selection == "Módulos":
+        current_selected_display_option = "📦 Módulos"
+    elif st.session_state.menu_selection == "Túnel":
+        current_selected_display_option = "🔗 Túnel"
+    elif st.session_state.menu_selection == "Cerrar sesión":
+        current_selected_display_option = "🚪 Cerrar sesión"
+
+
+    selected_index = display_options.index(current_selected_display_option)
+
 
     selected_option_display = st.sidebar.radio(
         "Navegación",
         options=display_options,
-        index=display_options.index(
-            "🏠 " + st.session_state.menu_selection if st.session_state.menu_selection == "Tablero" else st.session_state.menu_selection
-        ), # Ajusta el índice para que coincida con la opción de display
+        index=selected_index,
         key="main_menu_radio",
-        label_visibility="collapsed" # Oculta la etiqueta "Navegación"
+        label_visibility="collapsed"
     )
 
-    # Convertir de vuelta a la opción original para el manejo de contenido
-    # Quita el emoji '🏠 ' si está presente
-    actual_selected_option = selected_option_display.replace("🏠 ", "")
+    # Convert back to the original option name (removing emoji)
+    # This regex removes leading emojis and spaces.
+    import re
+    actual_selected_option = re.sub(r'^\S+\s+', '', selected_option_display)
+
 
     if actual_selected_option != st.session_state.menu_selection:
         st.session_state.menu_selection = actual_selected_option
         st.rerun()
 
     # --- Contenido principal basado en la selección del menú ---
-    # Usa actual_selected_option para el control de flujo
     if st.session_state.menu_selection == "Tablero":
         st.title("Tablero de Control")
         st.write("Bienvenido al tablero principal. Aquí podrás ver un resumen de los datos.")
